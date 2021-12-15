@@ -39,7 +39,7 @@ class LoggingContextVar(MutableMapping):
         return repr(self._var.get())
 
     def as_dict(self):
-        return self._var.get()
+        return self._var.get().copy()
 
     def update(self, d: LoggingContext) -> contextvars.Token:
         token = None
