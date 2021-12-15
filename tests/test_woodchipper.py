@@ -1,9 +1,7 @@
 import logging
 
-import pytest
-
 from tests.utilities import InspectableLoggerAdapter
-from woodchipper import _CapturedLoggerAdapter, arg_logger
+from woodchipper.woodchipper import _CapturedLoggerAdapter, arg_logger
 
 
 def test_captured_logger_adapter():
@@ -32,4 +30,4 @@ def test_arg_logger_happy_path():
     foo("bar value", key="key value")
     logger.info("Logged after foo is executed")
 
-    breakpoint()
+    # breakpoint()
