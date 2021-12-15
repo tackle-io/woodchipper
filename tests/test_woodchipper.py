@@ -1,33 +1,18 @@
-import logging
+from unittest.mock import patch
 
-from tests.utilities import InspectableLoggerAdapter
-from woodchipper.woodchipper import _CapturedLoggerAdapter, arg_logger
-
-
-def test_captured_logger_adapter():
-    class SimpleLoggerAdapterInterface:
-        def __init__(self, extra):
-            self.extra = extra
-
-    logger = SimpleLoggerAdapterInterface({"before_context": {"nested": "value"}})
-
-    assert logger.extra == {"before_context": {"nested": "value"}}
-
-    with _CapturedLoggerAdapter(logger, {"additional": "info"}):
-        assert logger.extra == {"before_context": {"nested": "value"}, "additional": "info"}
-
-    assert logger.extra == {"before_context": {"nested": "value"}}
+from woodchipper.woodchipper import arg_logger, missing
 
 
-def test_arg_logger_happy_path():
-    logger = InspectableLoggerAdapter(logging.getLogger(), {"before function": "begins"})
-
-    @arg_logger(logger, Foo="foo", bar="Bar", key="Key_Name", NestValue="nest.value")
+def test_arg_logger_invokes_logging_context_with_arguments():
+    @arg_logger(Foo="foo", Bar="bar", NestedObjID="key.nested_obj.id", NestValue="nest.value")
     def foo(bar, key=None, foo="hello", **kwargs):
-        logger.info("Logged message from within foo")
+        pass
 
-    logger.info("Logged before foo is executed")
-    foo("bar value", key="key value")
-    logger.info("Logged after foo is executed")
+    with patch("woodchipper.woodchipper.LoggingContext", autospec=True) as mocked:
+        foo("bar value", key={"nested_obj": {"id": "some_id"}})
 
-    # breakpoint()
+    assert mocked.called
+    assert not mocked.call_args.kwargs
+    assert mocked.call_args.args == (
+        {"Bar": "bar value", "NestedObjID": "some_id", "NestValue": missing, "Foo": missing},
+    )
