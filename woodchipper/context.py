@@ -4,11 +4,11 @@ from decimal import Decimal
 from typing import Mapping, Optional, Union
 
 LoggableValue = Optional[Union[str, int, bool, Decimal, float]]
-LoggingContext = Mapping[str, LoggableValue]
+LoggingContextType = Mapping[str, LoggableValue]
 
 
 class LoggingContextVar(MutableMapping):
-    _var: contextvars.ContextVar[LoggingContext]
+    _var: contextvars.ContextVar[LoggingContextType]
 
     def __init__(self, name):
         self._var = contextvars.ContextVar(name, default={})
@@ -38,7 +38,7 @@ class LoggingContextVar(MutableMapping):
     def __repr__(self):
         return repr(self._var.get({}))
 
-    def update(self, d: LoggingContext) -> contextvars.Token:
+    def update(self, d: LoggingContextType) -> contextvars.Token:
         token = None
         for key, value in d.items():
             new_token = self.__setitem__(key, value)
@@ -60,7 +60,7 @@ class LoggingContextManager:
     ```
     """
 
-    def __init__(self, injected_context: LoggingContext):
+    def __init__(self, injected_context: LoggingContextType):
         self.injected_context = injected_context
         self._token = None
 
