@@ -15,7 +15,7 @@ pip install woodchipper
 After cloning the repository, setting up a virtual environment, and activating it...
 
 ```
-python setup.py develop
+pip install -e .
 pip install -r requirements-dev.txt
 ```
 
