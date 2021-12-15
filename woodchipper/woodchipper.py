@@ -1,7 +1,7 @@
 import inspect
 from copy import deepcopy
 from functools import wraps
-from typing import Tuple, Union, NamedTuple, Mapping
+from typing import Mapping, NamedTuple, Tuple, Union
 
 
 class _Missing:
@@ -48,9 +48,7 @@ class ParamSearchConfig(NamedTuple):
     diggable: bool
 
 
-def _build_path_head_to_param_config_map(
-    kwargs: Mapping, *, delimiter: str = "."
-) -> Mapping[str, ParamSearchConfig]:
+def _build_path_head_to_param_config_map(kwargs: Mapping, *, delimiter: str = ".") -> Mapping[str, ParamSearchConfig]:
     return_mapping = {}
     for logger_name, dig_path in kwargs.items():
         if dig_path == "":
@@ -93,9 +91,7 @@ class arg_logger:
         self.working_extra = dict
         self.path_delimiter = path_delimiter
 
-        self.decorator_mapping = _build_path_head_to_param_config_map(
-            decorator_kwargs, delimiter=path_delimiter
-        )
+        self.decorator_mapping = _build_path_head_to_param_config_map(decorator_kwargs, delimiter=path_delimiter)
 
     def __call__(self, f):
         @wraps(f)
@@ -120,9 +116,7 @@ class arg_logger:
                 if dec_param_name not in mapped_args:
                     extra[param_config_entry.logger_name] = missing
                 else:
-                    value_candidate = mapped_args[
-                        dec_param_name
-                    ]  # if not diggable, this will be the actual value
+                    value_candidate = mapped_args[dec_param_name]  # if not diggable, this will be the actual value
                     if param_config_entry.diggable:
                         extra[param_config_entry.logger_name] = _pluck_value(
                             value_candidate,

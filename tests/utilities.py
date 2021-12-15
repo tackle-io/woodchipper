@@ -1,5 +1,4 @@
 from logging import LoggerAdapter
-from typing import Any, MutableMapping
 
 
 class InspectableLoggerAdapter(LoggerAdapter):
