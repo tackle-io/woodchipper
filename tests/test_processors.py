@@ -22,7 +22,6 @@ class TestInjectContextProcessor:
         assert result["test_key_1"] == mock_context_items["test_key_1"]
         assert result["test_key_2"] == mock_context_items["test_key_2"]
 
-
     @patch("woodchipper.context.logging_ctx.as_dict", return_value=mock_context_items)
     def test_updates_context_with_new_item(self, context_items):
         event_msg = {"new_key": "new_value"}
