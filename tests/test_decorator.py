@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from woodchipper.woodchipper import arg_logger, missing
+from woodchipper.decorator import arg_logger, missing
 
 
 def test_arg_logger_invokes_logging_context_with_arguments():
@@ -8,7 +8,7 @@ def test_arg_logger_invokes_logging_context_with_arguments():
     def foo(bar, key=None, foo="hello", **kwargs):
         pass
 
-    with patch("woodchipper.woodchipper.LoggingContext", autospec=True) as mocked:
+    with patch("woodchipper.decorator.LoggingContext", autospec=True) as mocked:
         foo("bar value", key={"nested_obj": {"id": "some_id"}})
 
     assert mocked.called
