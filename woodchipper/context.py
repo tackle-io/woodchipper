@@ -50,12 +50,12 @@ class LoggingContextVar(MutableMapping):
         self._var.reset(token)
 
 
-class LoggingContextManager:
+class LoggingContext:
     """A context manager for logging context.
 
     Usage:
     ```python
-    with LoggingContextManager(data_to_inject_to_logging_context):
+    with LoggingContext(data_to_inject_to_logging_context):
         some_function()
     ```
     """
