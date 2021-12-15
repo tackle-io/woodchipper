@@ -53,7 +53,6 @@ def _build_path_head_to_param_config_map(
         if dig_path == "":
             raise ValueError("Dig path cannot be an empty string")
         dig_head, remaining_dig_parts = dig_path.split(delimiter, 1) if delimiter in dig_path else (dig_path, "")
-        print(dig_path, dig_head)
         return_mapping[dig_head] = ParamSearchConfig(
             dig_path=remaining_dig_parts,
             logger_name=logger_name,
