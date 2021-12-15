@@ -50,4 +50,27 @@ class LoggingContextVar(MutableMapping):
         self._var.reset(token)
 
 
+class LoggingContextManager:
+    """A context manager for logging context.
+
+    Usage:
+    ```python
+    with LoggingContextManager(data_to_inject_to_logging_context):
+        some_function()
+    ```
+    """
+
+    def __init__(self, injected_context: LoggingContext):
+        self.injected_context = injected_context
+        self._token = None
+
+    def __enter__(self):
+        self._token = logging_ctx.update(self.injected_context)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        logging_ctx.reset(self._token)
+        self._token = None
+        return False
+
+
 logging_ctx = LoggingContextVar("logging_ctx")
