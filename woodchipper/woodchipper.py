@@ -13,33 +13,30 @@ missing = _Missing()
 
 
 def _split_head_node(str_path: str, delimiter=".") -> Tuple[str, str]:
-    head, *tail = str_path.split(delimiter)
-    return head, delimiter.join(tail)
+    head, tail = str_path.split(delimiter, 1) if delimiter in str_path else str_path, ""
+    return head, tail
 
 
 def _get_key_or_attr(obj, name: str, missing=missing):
     try:
         return getattr(obj, name)
     except AttributeError:
-        pass
-    try:
-        return obj[name]
-    except (TypeError, KeyError):
-        pass
-
-    return missing
+        try:
+            return obj[name]
+        except (TypeError, KeyError):
+            return missing
 
 
 def _pluck_value(obj, str_path: str, delimiter=".") -> Union[str, _Missing]:
     if not str_path:
-        return obj
+        return str(obj)
     else:
-        head, *remaining = _split_head_node(str_path, delimiter)
+        head, remaining = _split_head_node(str_path, delimiter)
         value = _get_key_or_attr(obj, head)
         if value is missing:
             return missing
         else:
-            return _pluck_value(value, delimiter.join(remaining), delimiter)
+            return _pluck_value(value, remaining, delimiter)
 
 
 class ParamSearchConfig(NamedTuple):
@@ -48,14 +45,17 @@ class ParamSearchConfig(NamedTuple):
     diggable: bool
 
 
-def _build_path_head_to_param_config_map(kwargs: Mapping, *, delimiter: str = ".") -> Mapping[str, ParamSearchConfig]:
+def _build_path_head_to_param_config_map(
+    kwargs: Mapping[str, str], *, delimiter: str = "."
+) -> Mapping[str, ParamSearchConfig]:
     return_mapping = {}
     for logger_name, dig_path in kwargs.items():
         if dig_path == "":
             raise ValueError("Dig path cannot be an empty string")
-        dig_head, *remaining_dig_parts = dig_path.split(delimiter)
+        dig_head, remaining_dig_parts = dig_path.split(delimiter, 1) if delimiter in dig_path else (dig_path, "")
+        print(dig_path, dig_head)
         return_mapping[dig_head] = ParamSearchConfig(
-            dig_path=delimiter.join(remaining_dig_parts),
+            dig_path=remaining_dig_parts,
             logger_name=logger_name,
             diggable=True if remaining_dig_parts else False,
         )
