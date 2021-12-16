@@ -27,6 +27,7 @@ class JSONLogToStdout(BaseConfigClass):
     processors = [
         structlog.stdlib.add_log_level,
         structlog.processors.StackInfoRenderer(),
+        woodchipper.processors.GitVersionProcessor(),
         structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S", utc=False),
         structlog.processors.CallsiteParameterAdder(parameters=callsite_parameters),
         structlog.processors.format_exc_info,
