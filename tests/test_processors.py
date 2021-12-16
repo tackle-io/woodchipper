@@ -48,6 +48,8 @@ class TestInjectContextProcessor:
         ({"foo": "foo_level", "foo.baz": "foo.baz_level"}, "foo.bar.quux", ("foo", "foo_level")),
         ({"foo": "foo_level"}, "baz", None),
         ({}, "baz", None),
+        ({"": "emtpy_string_entry"}, "foo", ("", "emtpy_string_entry")),
+        ({"": "emtpy_string_entry", "foo": "foo_value"}, "bar", ("", "emtpy_string_entry")),
         ({"foo.bar": "foo.bar_level", "foo.barz": "foo.barz_level"}, "foo.bar", ("foo.bar", "foo.bar_level")),
     ],
 )
@@ -55,24 +57,47 @@ def test_match_name_to_closest_facility(candidate_to_facility_mapping, full_path
     assert _match_name_to_closest_facility(full_path, candidate_to_facility_mapping) == facility_level_pair
 
 
-def test_minimum_log_level_processor():
-    testbarfoo_logger = logging.getLogger("test.bar.foo")
-    unknown_logger = logging.getLogger("unknown")
+class TestMinimumLogLevelProcessor__root_info_and_named_info:
+    """Test when root level (empty string) is INFO and named is INFO"""
 
-    with patch("woodchipper.processors.get_facilities", autospec=True) as stub:
-        stub.return_value = {"test.bar": "INFO"}
+    @pytest.fixture(scope="class")
+    def facilities(self):
+        return {"": "INFO", "test.bar": "INFO"}
 
+    @pytest.fixture(scope="class", autouse=True)
+    def get_facilities_stub(self, facilities):
+        with patch("woodchipper.processors.get_facilities", autospec=True) as stub:
+            stub.return_value = facilities
+            yield
+
+    @pytest.fixture(scope="class")
+    def named_logger(self):
+        return logging.getLogger("test.bar.foo")
+
+    @pytest.fixture(scope="class")
+    def unnamed_logger(self):
+        return logging.getLogger("unknown_logger")
+
+    def test_named_logger_below_facility_config(self, named_logger):
         with pytest.raises(structlog.DropEvent):
-            minimum_log_level_processor(testbarfoo_logger, "debug", {})
+            minimum_log_level_processor(named_logger, "debug", {})
 
-    with patch("woodchipper.processors.get_facilities", autospec=True) as stub:
-        stub.return_value = {"test.bar": "INFO"}
+    def test_named_logger_at_facility_config(self, named_logger):
+        # Would raise if rejected
+        assert minimum_log_level_processor(named_logger, "info", {}) == {}
 
-        # Tests that processor allows event through because logger exists in config and INFO >= INFO
-        assert minimum_log_level_processor(testbarfoo_logger, "info", {"foo": "bar"}) == {"foo": "bar"}
+    def test_named_logger_above_facility_config(self, named_logger):
+        # Would raise if rejected
+        assert minimum_log_level_processor(named_logger, "error", {}) == {}
 
-    with patch("woodchipper.processors.get_facilities", autospec=True) as stub:
-        stub.return_value = {"test.bar": "INFO"}
+    def test_unnamed_logger_below_facility_config(self, unnamed_logger):
+        with pytest.raises(structlog.DropEvent):
+            minimum_log_level_processor(unnamed_logger, "debug", {})
 
-        # Tests that unspecified loggers pass everything through, regardless of level
-        assert minimum_log_level_processor(unknown_logger, "doesntmatter", {"foo": "bar"}) == {"foo": "bar"}
+    def test_unnamed_logger_at_facility_config(self, unnamed_logger):
+        # Would raise if rejected
+        assert minimum_log_level_processor(unnamed_logger, "info", {}) == {}
+
+    def test_unnamed_logger_above_facility_config(self, unnamed_logger):
+        # Would raise if rejected
+        assert minimum_log_level_processor(unnamed_logger, "error", {}) == {}
