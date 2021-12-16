@@ -1,10 +1,10 @@
 import json
 import logging
-from typing import Union, Mapping, Tuple
+from typing import Union, Mapping, Tuple, Type
 
 from structlog import DropEvent
 
-from woodchipper import context
+from woodchipper import context, get_facilities
 
 
 def inject_context_processor(logger: logging.Logger, method: str, event_dict: dict):
@@ -59,18 +59,17 @@ def _match_name_to_closest_facility(
     return matches[-1], mapping[matches[-1]]
 
 
-class MinimumLogLevelProcessor:
-    def __init__(self, logging_facilities_config: Mapping[str, str]):
-        self.logging_facilities_config = logging_facilities_config
+_EventDict = Type["T"]
 
-    def __call__(self, logger, method_name, event_dict):
-        facility_match = _match_name_to_closest_facility(logger.name, self.logging_facilities_config)
-        if facility_match:
-            _facility, facility_log_level = facility_match
-            if logging.getLevelName(method_name.upper()) < logging.getLevelName(facility_log_level):
-                raise DropEvent
-        else:
-            # No match, so no filtering -- allow it through until we implement a default
-            pass
 
-        return event_dict
+def minimum_log_level_processor(logger, method_name, event_dict: _EventDict) -> _EventDict:
+    facility_match = _match_name_to_closest_facility(logger.name, get_facilities())
+    if facility_match:
+        _facility, facility_log_level = facility_match
+        if logging.getLevelName(method_name.upper()) < logging.getLevelName(facility_log_level):
+            raise DropEvent
+    else:
+        # No match, so no filtering -- allow it through until we implement a default
+        pass
+
+    return event_dict

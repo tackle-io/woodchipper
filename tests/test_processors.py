@@ -4,7 +4,11 @@ from unittest.mock import patch
 import pytest
 import structlog
 
-from woodchipper.processors import inject_context_processor, _match_name_to_closest_facility, MinimumLogLevelProcessor
+from woodchipper.processors import (
+    inject_context_processor,
+    _match_name_to_closest_facility,
+    minimum_log_level_processor,
+)
 
 mock_context_items = {
     "type": "info",
@@ -54,15 +58,21 @@ def test_match_name_to_closest_facility(candidate_to_facility_mapping, full_path
 def test_minimum_log_level_processor():
     testbarfoo_logger = logging.getLogger("test.bar.foo")
     unknown_logger = logging.getLogger("unknown")
-    config = {"test.bar": "INFO"}
 
-    processor = MinimumLogLevelProcessor(config)
+    with patch("woodchipper.processors.get_facilities", autospec=True) as stub:
+        stub.return_value = {"test.bar": "INFO"}
 
-    with pytest.raises(structlog.DropEvent):
-        processor(testbarfoo_logger, "debug", {})
+        with pytest.raises(structlog.DropEvent):
+            minimum_log_level_processor(testbarfoo_logger, "debug", {})
 
-    # Tests that processor allows event through because logger exists in config and INFO >= INFO
-    assert processor(testbarfoo_logger, "info", {"foo": "bar"}) == {"foo": "bar"}
+    with patch("woodchipper.processors.get_facilities", autospec=True) as stub:
+        stub.return_value = {"test.bar": "INFO"}
 
-    # Tests that unspecified loggers pass everything through, regardless of level
-    assert processor(unknown_logger, "doesntmatter", {"foo": "bar"}) == {"foo": "bar"}
+        # Tests that processor allows event through because logger exists in config and INFO >= INFO
+        assert minimum_log_level_processor(testbarfoo_logger, "info", {"foo": "bar"}) == {"foo": "bar"}
+
+    with patch("woodchipper.processors.get_facilities", autospec=True) as stub:
+        stub.return_value = {"test.bar": "INFO"}
+
+        # Tests that unspecified loggers pass everything through, regardless of level
+        assert minimum_log_level_processor(unknown_logger, "doesntmatter", {"foo": "bar"}) == {"foo": "bar"}
