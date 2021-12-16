@@ -5,12 +5,15 @@ from typing import Mapping, NamedTuple, Tuple, Union
 from woodchipper.context import LoggingContext
 
 
-class _Missing:
+class Missing:
+    """A sentinel value to be raised if something is missing."""
+
     def __repr__(self):
         return "<missing>"
 
 
-missing = _Missing()
+# Poor mans singleton
+missing = Missing()
 
 context = {
     "logging_ctx": {}
@@ -31,7 +34,9 @@ def _get_key_or_attr(obj, name: str, missing=missing):
             return missing
 
 
-def _pluck_value(obj, str_path: str, delimiter=".") -> Union[str, _Missing]:
+def pluck_value(obj, str_path: str, delimiter=".") -> Union[str, Missing]:
+    """Dig into an object or dict Using a JMSE-like path syntax. Return Missing if value cannot be found. Only
+    supports mapping-like behavior so cannot search sequences."""
     if not str_path:
         return obj
     else:
@@ -40,7 +45,7 @@ def _pluck_value(obj, str_path: str, delimiter=".") -> Union[str, _Missing]:
         if value is missing:
             return missing
         else:
-            return _pluck_value(value, remaining, delimiter)
+            return pluck_value(value, remaining, delimiter)
 
 
 class ParamSearchConfig(NamedTuple):
@@ -96,7 +101,7 @@ class arg_logger:
                 else:
                     value_candidate = mapped_args[dec_param_name]  # if not diggable, this will be the actual value
                     if param_config_entry.diggable:
-                        values_to_inject_into_ctx[param_config_entry.logger_name] = _pluck_value(
+                        values_to_inject_into_ctx[param_config_entry.logger_name] = pluck_value(
                             value_candidate,
                             param_config_entry.dig_path,
                             delimiter=self.path_delimiter,
