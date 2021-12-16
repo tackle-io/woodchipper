@@ -30,7 +30,7 @@ def configure(
         processors=config.processors,
         wrapper_class=structlog.BoundLogger,
         context_class=dict,
-        logger_factory=structlog.PrintLoggerFactory(),
+        logger_factory=config.factory,
         cache_logger_on_first_use=False,
     )
 

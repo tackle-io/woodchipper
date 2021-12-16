@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Union, Mapping, Tuple, Type
+from typing import Mapping, T, Tuple, Type, Union
 
 from structlog import DropEvent
 
@@ -72,4 +72,9 @@ def minimum_log_level_processor(logger, method_name, event_dict: _EventDict) -> 
         # No match, so no filtering -- allow it through until we implement a default
         pass
 
+    return event_dict
+
+
+def add_name_processor(logger, method_name, event_dict: _EventDict) -> _EventDict:
+    event_dict["name"] = logger.name
     return event_dict

@@ -1,5 +1,6 @@
 import structlog
 
+import woodchipper.logger
 import woodchipper.processors
 from woodchipper import BaseConfigClass
 
@@ -13,6 +14,7 @@ callsite_parameters = [
 class DevLogToStdout(BaseConfigClass):
     processors = [
         woodchipper.processors.minimum_log_level_processor,
+        woodchipper.processors.add_name_processor,
         structlog.stdlib.add_log_level,
         structlog.processors.StackInfoRenderer(),
         structlog.dev.set_exc_info,
@@ -21,12 +23,13 @@ class DevLogToStdout(BaseConfigClass):
         woodchipper.processors.inject_context_processor,
         structlog.dev.ConsoleRenderer(),
     ]
-    factory = structlog.PrintLoggerFactory()
+    factory = woodchipper.logger.SimpleLoggerFactory()
 
 
 class JSONLogToStdout(BaseConfigClass):
     processors = [
         woodchipper.processors.minimum_log_level_processor,
+        woodchipper.processors.add_name_processor,
         structlog.stdlib.add_log_level,
         structlog.processors.StackInfoRenderer(),
         woodchipper.processors.GitVersionProcessor(),
@@ -36,4 +39,4 @@ class JSONLogToStdout(BaseConfigClass):
         woodchipper.processors.inject_context_processor,
         structlog.processors.JSONRenderer(),
     ]
-    factory = structlog.PrintLoggerFactory()
+    factory = woodchipper.logger.SimpleLoggerFactory()
