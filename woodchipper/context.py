@@ -1,8 +1,9 @@
 import contextvars
 import os
+import time
 from collections.abc import MutableMapping
 from decimal import Decimal
-from typing import Mapping, Optional, Union, Any, cast
+from typing import Any, Mapping, Optional, Union, cast
 
 import woodchipper
 
@@ -74,6 +75,7 @@ class LoggingContext:
         self.prefix = os.getenv("WOODCHIPPER_KEY_PREFIX") if prefix is MISSING_PREFIX else prefix
         self._token = None
         self._monitors = [cls() for cls in woodchipper._monitors]
+        self.start_time: Optional[float]
 
     def __enter__(self):
         self._token = logging_ctx.update(
@@ -81,9 +83,10 @@ class LoggingContext:
         )
         for monitor in self._monitors:
             monitor.setup()
+        self.start_time = time.time()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        monitored_data = {}
+        monitored_data = {"context.time_to_run_μsec": int((time.time() - self.start_time) * 1e6)}
         for monitor in self._monitors:
             monitored_data.update(monitor.finish())
         woodchipper.get_logger(__name__).info("Exiting context.", **monitored_data)
