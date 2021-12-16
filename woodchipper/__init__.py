@@ -1,42 +1,51 @@
-import logging
+import importlib
+from typing import Callable, Dict, List, Set, Type, Union
+
 import structlog
 
-from structlog import get_logger as get_logger
-from typing import Any, List
+from woodchipper.monitors import BaseMonitor
+
+_monitors: Set[Type[BaseMonitor]] = set()
+_facilities: Dict[str, str] = {}
 
 
-DEFAULT_DEV_PROCESSORS = [
-    structlog.stdlib.add_log_level,
-    structlog.processors.StackInfoRenderer(),
-    structlog.dev.set_exc_info,
-    structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S", utc=False),
-    structlog.dev.ConsoleRenderer()
-]
+class BaseConfigClass:
+    processors: List[Callable]
+    factory: Callable
 
-DEPLOYMENT_PROCESSORS = [
-    structlog.stdlib.add_log_level,
-    structlog.processors.StackInfoRenderer(),
-    structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S", utc=False),
-    structlog.processors.JSONRenderer()
-]
 
 def configure(
-    environment: str = None,
-    log_level: int = logging.INFO,
-    processors: List = None,
-    factory: Any = structlog.stdlib.LoggerFactory()
+    *,
+    config: Union[str, BaseConfigClass] = "woodchipper.configs.DevLogToStdout",
+    facilities: Dict[str, str] = {"": "INFO"},
+    monitors: List[Type[BaseMonitor]] = [],
 ) -> None:
-
-    if not processors:
-        processors = DEPLOYMENT_PROCESSORS
-
-        if environment == 'development':
-            processors = DEFAULT_DEV_PROCESSORS
-
+    _monitors.update(set(monitors))
+    _facilities.update(facilities)
+    if isinstance(config, str):
+        module_name, cls_name = config.rsplit(".", 1)
+        module_obj = importlib.import_module(module_name)
+        config = getattr(module_obj, cls_name)
     structlog.configure(
-        processors=processors,
-        wrapper_class=structlog.make_filtering_bound_logger(log_level),
+        processors=config.processors,
+        wrapper_class=structlog.BoundLogger,
         context_class=dict,
-        logger_factory=factory,
-        cache_logger_on_first_use=False
+        logger_factory=structlog.PrintLoggerFactory(),
+        cache_logger_on_first_use=False,
     )
+
+
+def reset():
+    structlog.reset_defaults()
+
+
+def get_monitors():
+    return list(_monitors)
+
+
+def get_facilities():
+    return _facilities
+
+
+def get_logger(name: str) -> structlog.BoundLogger:
+    return structlog.get_logger(name)
