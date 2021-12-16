@@ -26,7 +26,7 @@ class GitVersionProcessor:
     def __call__(self, logger: logging.Logger, method: str, event_dict: dict):
         try:
             with open(self.version_json_path) as ifs:
-                git_version = json.loads(ifs.read())
+                git_version = json.load(ifs)
                 event_dict.update({f"git.{k}": v for k, v in git_version.items()})
         except (OSError, json.JSONDecodeError):
             pass
