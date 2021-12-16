@@ -3,8 +3,8 @@ import sqlalchemy
 
 from flask import Flask, Response
 from woodchipper.configs import JSONLogToStdout
+from woodchipper.http.aws_lambda import WoodchipperLambda
 from woodchipper.http.flask import WoodchipperFlask
-from woodchipper.http.lambda import WoodchipperLambda
 from woodchipper.context import LoggingContext
 from woodchipper.monitors.sqlalchemy import SQLAlchemyMonitor
 
