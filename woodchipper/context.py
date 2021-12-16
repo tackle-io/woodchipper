@@ -4,6 +4,8 @@ from collections.abc import MutableMapping
 from decimal import Decimal
 from typing import Mapping, Optional, Union, Any, cast
 
+import woodchipper
+
 LoggableValue = Optional[Union[str, int, bool, Decimal, float]]
 LoggingContextType = Mapping[str, LoggableValue]
 
@@ -71,13 +73,20 @@ class LoggingContext:
         self.injected_context = injected_context
         self.prefix = os.getenv("WOODCHIPPER_KEY_PREFIX") if prefix is MISSING_PREFIX else prefix
         self._token = None
+        self._monitors = [cls() for cls in woodchipper._monitors]
 
     def __enter__(self):
         self._token = logging_ctx.update(
             {(f"{self.prefix}.{k}" if self.prefix else k): v for k, v in self.injected_context.items()}
         )
+        for monitor in self._monitors:
+            monitor.setup()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        monitored_data = {}
+        for monitor in self._monitors:
+            monitored_data.update(monitor.finish())
+        woodchipper.get_logger(__name__).info("Exiting context.", **monitored_data)
         logging_ctx.reset(self._token)
         self._token = None
         return False

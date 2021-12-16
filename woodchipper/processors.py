@@ -1,7 +1,9 @@
+import logging
+
 from woodchipper import context
 
 
-def inject_context_processor(event_dict: dict):
+def inject_context_processor(logger: logging.Logger, method: str, event_dict: dict):
     """
     A function to update context with new log event key/value
     Returns updated context items
