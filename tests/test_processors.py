@@ -1,7 +1,10 @@
 import logging
 from unittest.mock import patch
 
-from woodchipper.processors import inject_context_processor
+import pytest
+import structlog
+
+from woodchipper.processors import inject_context_processor, _match_name_to_closest_facility, MinimumLogLevelProcessor
 
 mock_context_items = {
     "type": "info",
@@ -30,3 +33,36 @@ class TestInjectContextProcessor:
 
         assert result["new_key"] == event_msg["new_key"]
         assert result["test_key_1"] == mock_context_items["test_key_1"]
+
+
+@pytest.mark.parametrize(
+    argnames=["candidate_to_facility_mapping", "full_path", "facility_level_pair"],
+    argvalues=[
+        ({"foo": "foo_level", "bar": "bar_level"}, "foo", ("foo", "foo_level")),
+        ({"foo": "foo_level", "foo.bar": "foo.bar_level"}, "foo", ("foo", "foo_level")),
+        ({"foo": "foo_level", "foo.bar": "foo.bar_level"}, "foo.bar", ("foo.bar", "foo.bar_level")),
+        ({"foo": "foo_level", "foo.baz": "foo.baz_level"}, "foo.bar.quux", ("foo", "foo_level")),
+        ({"foo": "foo_level"}, "baz", None),
+        ({}, "baz", None),
+        ({"foo.bar": "foo.bar_level", "foo.barz": "foo.barz_level"}, "foo.bar", ("foo.bar", "foo.bar_level")),
+    ],
+)
+def test_match_name_to_closest_facility(candidate_to_facility_mapping, full_path, facility_level_pair):
+    assert _match_name_to_closest_facility(full_path, candidate_to_facility_mapping) == facility_level_pair
+
+
+def test_minimum_log_level_processor():
+    testbarfoo_logger = logging.getLogger("test.bar.foo")
+    unknown_logger = logging.getLogger("unknown")
+    config = {"test.bar": "INFO"}
+
+    processor = MinimumLogLevelProcessor(config)
+
+    with pytest.raises(structlog.DropEvent):
+        processor(testbarfoo_logger, "debug", {})
+
+    # Tests that processor allows event through because logger exists in config and INFO >= INFO
+    assert processor(testbarfoo_logger, "info", {"foo": "bar"}) == {"foo": "bar"}
+
+    # Tests that unspecified loggers pass everything through, regardless of level
+    assert processor(unknown_logger, "doesntmatter", {"foo": "bar"}) == {"foo": "bar"}
