@@ -1,8 +1,10 @@
-from woodchipper.context import LoggingContextVar
+from unittest.mock import patch
+
+from woodchipper import context
 
 
 def test_logging_context_var():
-    var = LoggingContextVar("var")
+    var = context.LoggingContextVar("var")
 
     # We start off empty
     assert var == {}
@@ -29,3 +31,16 @@ def test_logging_context_var():
     assert var == dict(a=1, b=2)
     var.reset(tkn1)
     assert var == {}
+
+
+def test_logging_context_prefix():
+    assert context.logging_ctx.as_dict() == {}
+    with context.LoggingContext({"a": 1}, prefix="test"):
+        assert context.logging_ctx.as_dict() == {"test.a": 1}
+
+    with patch("woodchipper.context.os.getenv", return_value="env"):
+        with context.LoggingContext({"a": 1}):
+            assert context.logging_ctx.as_dict() == {"env.a": 1}
+
+    with context.LoggingContext({"a": 1}, prefix=None):
+        assert context.logging_ctx.as_dict() == {"a": 1}
