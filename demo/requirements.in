@@ -1,3 +1,4 @@
 zappa==0.54.1
 flask==2.0.1
 structlog==21.5.0
+sqlalchemy==1.4.28

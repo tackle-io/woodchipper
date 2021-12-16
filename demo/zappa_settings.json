@@ -5,6 +5,8 @@
         "profile_name": "tackle-dev-env-admin",
         "project_name": "woodchipper-demo",
         "runtime": "python3.8",
-        "s3_bucket": "hackathon-4q21-woodchiper" 
+        "s3_bucket": "hackathon-4q21-woodchiper" ,
+        "debug": false,
+        "log_level": "WARNING"
     }
 }
