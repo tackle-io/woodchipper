@@ -1,3 +1,4 @@
+import json
 import woodchipper
 import sqlalchemy
 
@@ -37,9 +38,9 @@ def trigger_error():
         1/0
     except Exception as e:
         logger.error("Error Exception", exc_info=e)
-        return Response("Error", status=500)
+        return Response(json.dumps({"msg": "Error"}), status=500, mimetype="application/json")
 
-    return Response("Success", status=201)
+    return {"msg": "Success"}
 
 @app.route("/context")
 def set_context():
@@ -57,7 +58,7 @@ def sql_event():
             rows = conn.execute("SELECT 1")
             row = rows.fetchone()
             logger.info("SQL result.", row=row)
-            return Response(f"SQL Result {row}", status=201)
+            return Response(json.dumps({"msg": f"SQL Result {row}"}), status=201, mimetype="application/json")
 
 
 if __name__ == "__main__":
