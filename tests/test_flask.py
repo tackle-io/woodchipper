@@ -4,7 +4,7 @@ from unittest.mock import patch
 from flask import Flask
 
 from woodchipper.context import LoggingContext, logging_ctx
-from woodchipper.flask import WoodchipperFlask
+from woodchipper.http.flask import WoodchipperFlask
 
 app = Flask(__name__)
 WoodchipperFlask(app).chipperize()
