@@ -12,6 +12,7 @@ callsite_parameters = [
 
 class DevLogToStdout(BaseConfigClass):
     processors = [
+        woodchipper.processors.minimum_log_level_processor,
         structlog.stdlib.add_log_level,
         structlog.processors.StackInfoRenderer(),
         structlog.dev.set_exc_info,
@@ -25,6 +26,7 @@ class DevLogToStdout(BaseConfigClass):
 
 class JSONLogToStdout(BaseConfigClass):
     processors = [
+        woodchipper.processors.minimum_log_level_processor,
         structlog.stdlib.add_log_level,
         structlog.processors.StackInfoRenderer(),
         woodchipper.processors.GitVersionProcessor(),
