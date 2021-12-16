@@ -1,4 +1,5 @@
 import contextvars
+import os
 from collections.abc import MutableMapping
 from decimal import Decimal
 from typing import Mapping, Optional, Union
@@ -53,6 +54,9 @@ class LoggingContextVar(MutableMapping):
         self._var.reset(token)
 
 
+MISSING_PREFIX = object()
+
+
 class LoggingContext:
     """A context manager for logging context.
 
@@ -63,12 +67,15 @@ class LoggingContext:
     ```
     """
 
-    def __init__(self, injected_context: LoggingContextType):
+    def __init__(self, injected_context: LoggingContextType, prefix=MISSING_PREFIX):
         self.injected_context = injected_context
+        self.prefix = os.getenv("WOODCHIPPER_KEY_PREFIX") if prefix is MISSING_PREFIX else prefix
         self._token = None
 
     def __enter__(self):
-        self._token = logging_ctx.update(self.injected_context)
+        self._token = logging_ctx.update(
+            {(f"{self.prefix}.{k}" if self.prefix else k): v for k, v in self.injected_context.items()}
+        )
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         logging_ctx.reset(self._token)
