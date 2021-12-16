@@ -1,7 +1,9 @@
 import logging
 import woodchipper
+import structlog
 
-from structlog.testing import capture_logs, CapturingLoggerFactory
+from structlog.testing import capture_logs
+from woodchipper import DEFAULT_DEV_PROCESSORS, DEPLOYMENT_PROCESSORS
 
 class TestWoodchipperLogging:
     def test_woodchipper_outputs_logs(self):
@@ -26,3 +28,17 @@ class TestWoodchipperLogging:
             {'event': 'Critical Log Test', 'log_level': 'critical'},
             {'exc_info': True, 'event': 'Exception Log Test', 'log_level': 'error'}
         ]
+
+    def test_woodchipper_sets_deployment_processors_by_default(self):
+        woodchipper.configure()
+        log_config = structlog.get_config()
+        assert log_config['processors'] == DEPLOYMENT_PROCESSORS
+
+
+    def test_woodchipper_sets_dev_processors(self):
+        woodchipper.configure(
+            environment='development'
+        )
+        log_config = structlog.get_config()
+        assert log_config['processors'] == DEFAULT_DEV_PROCESSORS
+
