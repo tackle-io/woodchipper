@@ -1,5 +1,8 @@
 import json
 import logging
+from typing import Union, Mapping, Tuple
+
+from structlog import DropEvent
 
 from woodchipper import context
 
@@ -30,4 +33,44 @@ class GitVersionProcessor:
                 event_dict.update({f"git.{k}": v for k, v in git_version.items()})
         except (OSError, json.JSONDecodeError):
             pass
+        return event_dict
+
+
+NameFacilityPair = Tuple[str, str]
+
+NoMatch = None
+
+
+def _match_name_to_closest_facility(
+    dot_delimited_full_name: str, mapping: Mapping[str, str]
+) -> Union[NameFacilityPair, NoMatch]:
+
+    matches = []
+    if not mapping:
+        return NoMatch
+    for candidate in mapping.keys():
+        if dot_delimited_full_name.startswith(candidate):
+            matches.append(candidate)
+
+    if not matches:
+        return NoMatch
+
+    matches.sort(key=lambda elem: len(elem))
+    return matches[-1], mapping[matches[-1]]
+
+
+class MinimumLogLevelProcessor:
+    def __init__(self, logging_facilities_config: Mapping[str, str]):
+        self.logging_facilities_config = logging_facilities_config
+
+    def __call__(self, logger, method_name, event_dict):
+        facility_match = _match_name_to_closest_facility(logger.name, self.logging_facilities_config)
+        if facility_match:
+            _facility, facility_log_level = facility_match
+            if logging.getLevelName(method_name.upper()) < logging.getLevelName(facility_log_level):
+                raise DropEvent
+        else:
+            # No match, so no filtering -- allow it through until we implement a default
+            pass
+
         return event_dict
