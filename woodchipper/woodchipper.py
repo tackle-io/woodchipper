@@ -11,6 +11,9 @@ class _Missing:
 
 missing = _Missing()
 
+context = {
+    "logging_ctx": {}
+}
 
 def _split_head_node(str_path: str, delimiter=".") -> Tuple[str, str]:
     head, tail = str_path.split(delimiter, 1) if delimiter in str_path else str_path, ""
