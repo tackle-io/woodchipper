@@ -13,7 +13,7 @@ def connect(sa_monitor):
 
 
 SQLAlchemyMonitor.instance_setup_cb = connect
-woodchipper.configure(DevLogToStdout, {"": "INFO"}, monitors=[SQLAlchemyMonitor])
+woodchipper.configure(config=DevLogToStdout, facilities={"": "INFO"}, monitors=[SQLAlchemyMonitor])
 
 
 def test_sqlalchemy():

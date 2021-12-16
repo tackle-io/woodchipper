@@ -1,4 +1,5 @@
-from typing import Callable, Dict, List, Set, Type
+import importlib
+from typing import Callable, Dict, List, Set, Type, Union
 
 import structlog
 
@@ -13,9 +14,18 @@ class BaseConfigClass:
     factory: Callable
 
 
-def configure(config: BaseConfigClass, facilities: Dict[str, str], monitors: List[Type[BaseMonitor]]) -> None:
+def configure(
+    *,
+    config: Union[str, BaseConfigClass] = "woodchipper.configs.DevLogToStdout",
+    facilities: Dict[str, str] = {"": "INFO"},
+    monitors: List[Type[BaseMonitor]] = [],
+) -> None:
     _monitors.update(set(monitors))
     _facilities.update(facilities)
+    if isinstance(config, str):
+        module_name, cls_name = config.rsplit(".", 1)
+        module_obj = importlib.import_module(module_name)
+        config = getattr(module_obj, cls_name)
     structlog.configure(
         processors=config.processors,
         wrapper_class=structlog.BoundLogger,
