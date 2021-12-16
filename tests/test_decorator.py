@@ -17,7 +17,7 @@ def test_arg_logger_invokes_logging_context_with_arguments():
     assert mocked.called
     assert not mocked.call_args.kwargs
     assert mocked.call_args.args == (
-        {"Bar": "bar value", "NestedObjID": "some_id", "NestValue": missing, "Foo": missing},
+        {"Bar": "bar value", "NestedObjID": "some_id", "NestValue": str(missing), "Foo": str(missing)},
     )
 
 

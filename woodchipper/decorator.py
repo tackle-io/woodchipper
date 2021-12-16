@@ -1,8 +1,8 @@
 import inspect
 from functools import wraps
-from typing import Mapping, NamedTuple, Tuple, Union
+from typing import Mapping, NamedTuple, Tuple, Union, Any
 
-from woodchipper.context import LoggingContext
+from woodchipper.context import LoggingContext, _convert_to_loggable_value
 
 
 class Missing:
@@ -34,7 +34,7 @@ def _get_key_or_attr(obj, name: str, missing=missing):
             return missing
 
 
-def pluck_value(obj, str_path: str, delimiter=".") -> Union[str, Missing]:
+def pluck_value(obj, str_path: str, delimiter=".") -> Union[Any, Missing]:
     """Dig into an object or dict Using a JMSE-like path syntax. Return Missing if value cannot be found. Only
     supports mapping-like behavior so cannot search sequences."""
     if not str_path:
@@ -95,19 +95,21 @@ class arg_logger:
 
             values_to_inject_into_ctx = {}
 
+            # TODO: extract this functionality so that it's unit testable
             for dec_param_name, param_config_entry in self.decorator_mapping.items():
                 if dec_param_name not in mapped_args:
-                    values_to_inject_into_ctx[param_config_entry.logger_name] = missing
+                    raw_value = self.missing_default
                 else:
-                    value_candidate = mapped_args[dec_param_name]  # if not diggable, this will be the actual value
                     if param_config_entry.diggable:
-                        values_to_inject_into_ctx[param_config_entry.logger_name] = pluck_value(
-                            value_candidate,
+                        raw_value = pluck_value(
+                            mapped_args[dec_param_name],
                             param_config_entry.dig_path,
                             delimiter=self.path_delimiter,
                         )
                     else:
-                        values_to_inject_into_ctx[param_config_entry.logger_name] = value_candidate
+                        raw_value = mapped_args[dec_param_name]
+
+                values_to_inject_into_ctx[param_config_entry.logger_name] = _convert_to_loggable_value(raw_value)
 
             with LoggingContext(values_to_inject_into_ctx):
                 return f(*func_args, **func_kwargs)
