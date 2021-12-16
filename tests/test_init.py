@@ -5,10 +5,8 @@ from structlog.testing import capture_logs, CapturingLoggerFactory
 
 class TestWoodchipperLogging:
     def test_woodchipper_outputs_logs(self):
-        cf = CapturingLoggerFactory()
         woodchipper.configure(
-            log_level=logging.DEBUG,
-            factory=cf
+            log_level=logging.DEBUG
         )
         logger = woodchipper.get_logger()
 
