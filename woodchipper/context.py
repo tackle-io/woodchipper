@@ -2,7 +2,7 @@ import contextvars
 import os
 from collections.abc import MutableMapping
 from decimal import Decimal
-from typing import Mapping, Optional, Union
+from typing import Mapping, Optional, Union, Any, cast
 
 LoggableValue = Optional[Union[str, int, bool, Decimal, float]]
 LoggingContextType = Mapping[str, LoggableValue]
@@ -84,3 +84,17 @@ class LoggingContext:
 
 
 logging_ctx = LoggingContextVar("logging_ctx")
+
+
+def _convert_to_loggable_value(value: Any) -> LoggableValue:
+    loggable_types = {str, int, bool, Decimal, float, None}
+    if type(value) in loggable_types:
+        return cast(LoggableValue, value)
+    else:
+        try:
+            return str(value)
+        except Exception:
+            raise ValueError(
+                f"Value type (type={type(value)} is not a not a LoggableType ({str, int, bool, Decimal, float, None}) "
+                f"and cannot be converted to string."
+            )
