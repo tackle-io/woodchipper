@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 from flask import g, request
@@ -10,6 +11,9 @@ BLACKLISTED_HEADERS = ["authorization", "cookie"]
 class WoodchipperFlask:
     def __init__(self, app, blacklisted_headers=BLACKLISTED_HEADERS, request_id_factory=None):
         self._app = app
+        app.logger.disabled = True
+        log = logging.getLogger("werkzeug")
+        log.disabled = True
         self._blacklisted_headers = blacklisted_headers
         self._request_id_factory = request_id_factory or (lambda: str(uuid.uuid4()))
         self.vanilla_full_dispatch_request = app.full_dispatch_request
