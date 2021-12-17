@@ -1,4 +1,5 @@
 import json
+import time
 
 import woodchipper
 import sqlalchemy
@@ -54,6 +55,14 @@ def set_context():
     with LoggingContext(dict(woodchipper_added_context="Hello from Woodchipper")):
         logger.info("Test Log Context")
         return {"msg": "Testing Log Context"}
+
+
+@app.route("/timed-context")
+def set_context():
+    with LoggingContext(dict(timed_context="Inside context", prefix="timed_context")):
+        time.sleep(5)
+
+    return "Finished!"
 
 
 @app.route("/sql-event")
