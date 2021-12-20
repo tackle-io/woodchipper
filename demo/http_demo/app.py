@@ -4,18 +4,14 @@
 import os
 
 from flask import Flask
+
 import woodchipper
-from woodchipper.http.flask import WoodchipperFlask
 from woodchipper.configs import DevLogToStdout
+from woodchipper.http.flask import WoodchipperFlask
 
 os.environ["WOODCHIPPER_KEY_PREFIX"] = "tkl"
 
-woodchipper.configure(
-    config=DevLogToStdout,
-    facilities={
-        "app": "INFO"
-    }
-)
+woodchipper.configure(config=DevLogToStdout, facilities={"app": "INFO", "werkzeug": "INFO", "flask": "INFO"})
 
 logger = woodchipper.get_logger(__name__)
 

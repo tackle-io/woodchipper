@@ -1,6 +1,6 @@
 import inspect
 from functools import wraps
-from typing import Mapping, NamedTuple, Tuple, Union, Any
+from typing import Any, Mapping, NamedTuple, Tuple, Union
 
 from woodchipper.context import LoggingContext, _convert_to_loggable_value
 

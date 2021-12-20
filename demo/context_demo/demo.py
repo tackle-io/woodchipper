@@ -4,18 +4,13 @@
 import os
 
 import woodchipper
+from woodchipper.configs import DevLogToStdout
 from woodchipper.context import LoggingContext
 from woodchipper.decorator import arg_logger
-from woodchipper.configs import DevLogToStdout
 
 os.environ["WOODCHIPPER_KEY_PREFIX"] = "tkl"
 
-woodchipper.configure(
-    config=DevLogToStdout,
-    facilities={
-        "demo": "INFO"
-    }
-)
+woodchipper.configure(config=DevLogToStdout, facilities={"demo": "INFO"})
 
 logger = woodchipper.get_logger(__name__)
 
