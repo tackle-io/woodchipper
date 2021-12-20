@@ -1,6 +1,5 @@
 import structlog
 
-import woodchipper.logger
 import woodchipper.processors
 from woodchipper import BaseConfigClass
 
@@ -13,30 +12,36 @@ callsite_parameters = [
 
 class DevLogToStdout(BaseConfigClass):
     processors = [
-        woodchipper.processors.minimum_log_level_processor,
-        woodchipper.processors.add_name_processor,
         structlog.stdlib.add_log_level,
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.ExtraAdder(),
+        structlog.stdlib.PositionalArgumentsFormatter(),
         structlog.processors.StackInfoRenderer(),
         structlog.dev.set_exc_info,
+        structlog.processors.UnicodeDecoder(),
         structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S", utc=False),
         structlog.processors.CallsiteParameterAdder(parameters=callsite_parameters),
         woodchipper.processors.inject_context_processor,
-        structlog.dev.ConsoleRenderer(),
     ]
-    factory = woodchipper.logger.SimpleLoggerFactory()
+    factory = structlog.stdlib.LoggerFactory()
+    wrapper_class = structlog.stdlib.BoundLogger
+    renderer = structlog.dev.ConsoleRenderer()
 
 
 class JSONLogToStdout(BaseConfigClass):
     processors = [
-        woodchipper.processors.minimum_log_level_processor,
-        woodchipper.processors.add_name_processor,
         structlog.stdlib.add_log_level,
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.ExtraAdder(),
+        structlog.stdlib.PositionalArgumentsFormatter(),
         structlog.processors.StackInfoRenderer(),
         woodchipper.processors.GitVersionProcessor(),
         structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S", utc=False),
         structlog.processors.CallsiteParameterAdder(parameters=callsite_parameters),
         structlog.processors.format_exc_info,
+        structlog.processors.UnicodeDecoder(),
         woodchipper.processors.inject_context_processor,
-        structlog.processors.JSONRenderer(),
     ]
-    factory = woodchipper.logger.SimpleLoggerFactory()
+    factory = structlog.stdlib.LoggerFactory()
+    wrapper_class = structlog.stdlib.BoundLogger
+    renderer = structlog.processors.JSONRenderer()

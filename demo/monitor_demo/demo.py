@@ -4,6 +4,7 @@
 import os
 
 import sqlalchemy
+
 import woodchipper
 from woodchipper.configs import DevLogToStdout
 from woodchipper.context import LoggingContext
@@ -20,11 +21,7 @@ def connect(sa_monitor):
 
 
 SQLAlchemyMonitor.instance_setup_cb = connect
-woodchipper.configure(
-    config=DevLogToStdout,
-    facilities={"demo": "INFO"},
-    monitors=[SQLAlchemyMonitor]
-)
+woodchipper.configure(config=DevLogToStdout, facilities={"demo": "INFO"}, monitors=[SQLAlchemyMonitor])
 
 logger = woodchipper.get_logger(__name__)
 
