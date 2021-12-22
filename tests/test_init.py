@@ -6,13 +6,13 @@ import pytest
 from structlog.testing import capture_logs
 
 import woodchipper
+from woodchipper.configs import Minimal
 
 
 class TestWoodchipperLogging:
-    @pytest.mark.skip("Fix once we get jd's PR in")
     def test_woodchipper_outputs_logs(self):
-        woodchipper.configure(log_level=logging.DEBUG)
-        logger = woodchipper.get_logger()
+        woodchipper.configure(config=Minimal, facilities={"": "DEBUG"})
+        logger = woodchipper.get_logger(__name__)
 
         with capture_logs() as caps_logs:
             logger.debug("Debug Log Test")
@@ -31,7 +31,7 @@ class TestWoodchipperLogging:
             {"exc_info": True, "event": "Exception Log Test", "log_level": "error"},
         ]
 
-    @pytest.mark.skip("Fix once we get jd's PR in")
+    @pytest.mark.skip("Figure out a way to test based on what actually get handled.")
     def test_woodchipper_set_log_level(self):
         woodchipper.configure(log_level=logging.ERROR)
         logger = woodchipper.get_logger()
@@ -49,13 +49,3 @@ class TestWoodchipperLogging:
             {"event": "Critical Log Test", "log_level": "critical"},
             {"exc_info": True, "event": "Exception Log Test", "log_level": "error"},
         ]
-
-    @pytest.mark.skip("Fix once we get jd's PR in")
-    def test_woodchipper_sets_deployment_processors_by_default(self):
-        woodchipper.configure()
-        # log_config = structlog.get_config()
-
-    @pytest.mark.skip("Fix once we get jd's PR in")
-    def test_woodchipper_sets_dev_processors(self):
-        woodchipper.configure(environment="development")
-        # log_config = structlog.get_config()
