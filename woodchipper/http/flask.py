@@ -18,7 +18,7 @@ class WoodchipperFlask:
         if not getattr(g, "request_id", None):
             g.request_id = self._request_id_factory()
         with LoggingContext(
-            {
+            **{
                 "id": g.request_id,
                 "body_size": request.content_length,
                 "method": request.method,
@@ -28,7 +28,7 @@ class WoodchipperFlask:
                     for header, value in request.headers.items()
                 },
             },
-            prefix="http",
+            _prefix="http",
         ):
             return self.vanilla_full_dispatch_request()
 

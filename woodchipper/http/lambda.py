@@ -10,7 +10,7 @@ class WoodchipperLambda:
             # This is a decent sentinel for being in a Lambda environment
             return self._app(environ, start_response)
         with LoggingContext(
-            {"aws-request-id": getattr(environ.get("lambda.context", object()), "aws_request_id", None)},
-            prefix="lambda",
+            **{"aws-request-id": getattr(environ.get("lambda.context", object()), "aws_request_id", None)},
+            _prefix="lambda",
         ):
             return self._app(environ, start_response)
