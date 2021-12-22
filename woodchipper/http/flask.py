@@ -28,7 +28,7 @@ class WoodchipperFlask:
                     for header, value in request.headers.items()
                 },
             },
-            prefix="http",
+            _prefix="http",
         ):
             return self.vanilla_full_dispatch_request()
 

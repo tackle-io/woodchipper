@@ -146,14 +146,16 @@ class LoggingContext:
     ```
     """
 
-    def __init__(self, *, prefix=missing, missing_default=missing, path_delimiter=".", **kwargs: LoggingContextType):
+    def __init__(
+        self, *, _prefix=missing, _missing_default=missing, _path_delimiter=".", **kwargs: LoggingContextType
+    ):
         # If
         self.injected_context = kwargs
-        self.prefix = os.getenv("WOODCHIPPER_KEY_PREFIX") if prefix is missing else prefix
+        self.prefix = os.getenv("WOODCHIPPER_KEY_PREFIX") if _prefix is missing else _prefix
         self._token = None
         self._monitors = [cls() for cls in woodchipper._monitors]
-        self.missing_default = missing_default
-        self.path_delimiter = path_delimiter
+        self.missing_default = _missing_default
+        self.path_delimiter = _path_delimiter
         self.start_time: Optional[float]
 
     def __enter__(self):
