@@ -4,7 +4,7 @@
 import woodchipper
 from woodchipper.configs import DevLogToStdout
 
-woodchipper.configure(config=DevLogToStdout, facilities={"demo": "INFO"})
+woodchipper.configure(config=DevLogToStdout, facilities={"": "INFO"})
 
 logger = woodchipper.get_logger(__name__)
 
