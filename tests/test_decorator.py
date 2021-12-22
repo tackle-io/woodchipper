@@ -1,24 +1,25 @@
 from types import SimpleNamespace
-from unittest.mock import patch
 
 import pytest
 
-from woodchipper.decorator import arg_logger, missing, pluck_value
+from woodchipper.context import LoggingContext, missing, pluck_value
 
 
 def test_arg_logger_invokes_logging_context_with_arguments():
-    @arg_logger(Foo="foo", Bar="bar", NestedObjID="key.nested_obj.id", NestValue="nest.value")
+    dec = LoggingContext(Foo="foo", Bar="bar", NestedObjID="key.nested_obj.id", NestValue="nest.value")
+
+    @dec
     def foo(bar, key=None, foo="hello", **kwargs):
         pass
 
-    with patch("woodchipper.decorator.LoggingContext", autospec=True) as mocked:
-        foo("bar value", key={"nested_obj": {"id": "some_id"}})
+    foo("bar value", key={"nested_obj": {"id": "some_id"}})
 
-    assert mocked.called
-    assert not mocked.call_args.kwargs
-    assert mocked.call_args.args == (
-        {"Bar": "bar value", "NestedObjID": "some_id", "NestValue": str(missing), "Foo": str(missing)},
-    )
+    assert dec.injected_context == {
+        "Bar": "bar value",
+        "NestedObjID": "some_id",
+        "NestValue": str(missing),
+        "Foo": str(missing),
+    }
 
 
 @pytest.mark.parametrize(

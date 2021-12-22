@@ -18,7 +18,7 @@ woodchipper.configure(config=DevLogToStdout, facilities={"": "INFO"}, monitors=[
 
 def test_sqlalchemy():
     logger = woodchipper.get_logger(__name__)
-    with LoggingContext({"test": "sqlalchemy"}):
+    with LoggingContext(test="sqlalchemy"):
         with engine.connect() as conn:
             rows = conn.execute("SELECT 1")
             logger.info("SQL result.", row=rows.fetchone())

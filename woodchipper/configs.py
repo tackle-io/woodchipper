@@ -10,6 +10,19 @@ callsite_parameters = [
 ]
 
 
+class Minimal(BaseConfigClass):
+    """
+    Really used for unit tests. That's it.
+    """
+
+    processors = [
+        structlog.stdlib.add_log_level,
+    ]
+    factory = structlog.stdlib.LoggerFactory()
+    wrapper_class = structlog.stdlib.BoundLogger
+    renderer = structlog.processors.JSONRenderer()
+
+
 class DevLogToStdout(BaseConfigClass):
     processors = [
         structlog.stdlib.add_log_level,
