@@ -8,5 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-
-### Fixed
+- Structlog configuration wrapper
+- Contextual logging with context manager and decorator
+- WSGI adapters for Lambda and Flask
+- Monitor for SQLAlchemy
+- Git version file processor
