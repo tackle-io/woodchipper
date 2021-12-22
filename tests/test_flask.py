@@ -12,7 +12,7 @@ WoodchipperFlask(app).chipperize()
 
 @app.route("/")
 def hello_world():
-    with LoggingContext({"testvar": "testval"}):
+    with LoggingContext(testvar="testval"):
         return logging_ctx.as_dict()
 
 
