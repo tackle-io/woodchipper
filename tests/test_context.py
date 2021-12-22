@@ -35,12 +35,12 @@ def test_logging_context_var():
 
 def test_logging_context_prefix():
     assert context.logging_ctx.as_dict() == {}
-    with context.LoggingContext(a=1, prefix="test"):
+    with context.LoggingContext(a=1, _prefix="test"):
         assert context.logging_ctx.as_dict() == {"test.a": 1}
 
     with patch("woodchipper.context.os.getenv", return_value="env"):
         with context.LoggingContext(a=1):
             assert context.logging_ctx.as_dict() == {"env.a": 1}
 
-    with context.LoggingContext(a=1, prefix=None):
+    with context.LoggingContext(a=1, _prefix=None):
         assert context.logging_ctx.as_dict() == {"a": 1}
