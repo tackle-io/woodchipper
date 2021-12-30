@@ -141,3 +141,4 @@ dmypy.json
 cython_debug/
 
 version.json
+node_modules/
