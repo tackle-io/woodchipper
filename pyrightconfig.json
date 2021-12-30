@@ -1,0 +1,8 @@
+{
+    "typeCheckingMode": "basic",
+    "useLibraryCodeForTypes": true,
+    "ignore": [
+        "demo/",
+        "tests/"
+    ]
+}

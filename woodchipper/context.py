@@ -82,11 +82,11 @@ class LoggingContextVar(MutableMapping):
     def __init__(self, name):
         self._var = contextvars.ContextVar(name, default={})
 
-    def __getitem__(self, key: str) -> str:
+    def __getitem__(self, key: str) -> LoggableValue:
         return self._var.get().get(key)
 
     def __setitem__(self, key: str, value: LoggableValue) -> contextvars.Token:
-        updated = self._var.get().copy()
+        updated = dict(self._var.get())
         updated[key] = value
         return self._var.set(updated)
 
@@ -94,7 +94,7 @@ class LoggingContextVar(MutableMapping):
         return val == self._var.get()
 
     def __delitem__(self, key: str) -> contextvars.Token:
-        updated = self._var.get().copy()
+        updated = dict(self._var.get())
         del updated[key]
         return self._var.set(updated)
 
@@ -108,7 +108,7 @@ class LoggingContextVar(MutableMapping):
         return repr(self._var.get())
 
     def as_dict(self):
-        return self._var.get().copy()
+        return dict(self._var.get())
 
     def update(self, d: LoggingContextType) -> contextvars.Token:
         token = None
@@ -116,6 +116,8 @@ class LoggingContextVar(MutableMapping):
             new_token = self.__setitem__(key, value)
             if token is None:
                 token = new_token
+        if token is None:
+            raise ValueError("Cannot update with empty mapping.")
         return token
 
     def reset(self, token: contextvars.Token):
@@ -146,17 +148,15 @@ class LoggingContext:
     ```
     """
 
-    def __init__(
-        self, *, _prefix=missing, _missing_default=missing, _path_delimiter=".", **kwargs: LoggingContextType
-    ):
-        # If
+    start_time: float
+
+    def __init__(self, *, _prefix=missing, _missing_default=missing, _path_delimiter=".", **kwargs: LoggableValue):
         self.injected_context = kwargs
         self.prefix = os.getenv("WOODCHIPPER_KEY_PREFIX") if _prefix is missing else _prefix
         self._token = None
         self._monitors = [cls() for cls in woodchipper._monitors]
         self.missing_default = _missing_default
         self.path_delimiter = _path_delimiter
-        self.start_time: Optional[float]
 
     def __enter__(self):
         self._token = logging_ctx.update(
@@ -167,10 +167,12 @@ class LoggingContext:
         self.start_time = time.time()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        monitored_data = {"context.time_to_run_μsec": int((time.time() - self.start_time) * 1e6)}
+        monitored_data: LoggingContextType = {}
+        monitored_data.update({"context.time_to_run_μsec": int((time.time() - self.start_time) * 1e6)})
         for monitor in self._monitors:
             monitored_data.update(monitor.finish())
         woodchipper.get_logger(__name__).info("Exiting context.", **monitored_data)
+        assert self._token
         logging_ctx.reset(self._token)
         self._token = None
         return False

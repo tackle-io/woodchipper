@@ -13,12 +13,13 @@ _facilities: Dict[str, str] = {}
 class BaseConfigClass:
     processors: List[Callable]
     factory: Callable
-    wrapper: Type
+    wrapper_class: Type
+    renderer: Callable
 
 
 def configure(
     *,
-    config: Union[str, BaseConfigClass] = "woodchipper.configs.DevLogToStdout",
+    config: Union[str, Type[BaseConfigClass]] = "woodchipper.configs.DevLogToStdout",
     facilities: Dict[str, str] = {"": "INFO"},
     override_existing: bool = True,
     monitors: List[Type[BaseMonitor]] = [],
@@ -29,6 +30,7 @@ def configure(
         module_name, cls_name = config.rsplit(".", 1)
         module_obj = importlib.import_module(module_name)
         config = getattr(module_obj, cls_name)
+        assert isinstance(config, type)
     dict_config = {
         "version": 1,
         "disable_existing_loggers": override_existing,
