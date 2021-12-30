@@ -9,10 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Added static type checking configuration
+- Added extra keys to lambda context for function name and version
 
 ### Fixed
 - Fixed incorrect type hint on `woodchipper.configure` (#19)
 - Fixed all pyright complaints
+- Renamed lambda module to something more easily importable (#17)
+
 ## [v0.2] 22 December, 2021
 
 ### Added
