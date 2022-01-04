@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Packaging metadata to reflect the move under Tackle's aegis
+
 ## [v0.3] 30 December, 2021
 
 ### Added
