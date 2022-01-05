@@ -1,3 +1,5 @@
+import os
+
 from woodchipper.context import LoggingContext
 
 
@@ -6,7 +8,7 @@ class WoodchipperLambda:
         self._app = app
 
     def __call__(self, environ, start_response):
-        if "LAMBDA_TASK_ROOT" not in environ:
+        if "LAMBDA_TASK_ROOT" not in os.environ:
             # This is a decent sentinel for being in a Lambda environment
             return self._app(environ, start_response)
         context = environ.get("lambda.context", object())
