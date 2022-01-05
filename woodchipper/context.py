@@ -150,7 +150,10 @@ class LoggingContext:
 
     start_time: float
 
-    def __init__(self, *, _prefix=missing, _missing_default=missing, _path_delimiter=".", **kwargs: LoggableValue):
+    def __init__(
+        self, name=None, *, _prefix=missing, _missing_default=missing, _path_delimiter=".", **kwargs: LoggableValue
+    ):
+        self.name = name
         self.injected_context = kwargs
         self.prefix = os.getenv("WOODCHIPPER_KEY_PREFIX") if _prefix is missing else _prefix
         self._token = None
@@ -167,11 +170,20 @@ class LoggingContext:
         self.start_time = time.time()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        current_frame = inspect.currentframe()
+        calling_frame = inspect.getouterframes(current_frame, 2)[1]
+        module = inspect.getmodule(calling_frame[0])
+        module_name = module.__name__ if module else "<unknown>"
+        # If self.name is None, derive the name from the module and function from which we were called
+        if self.name is None:
+            func_name = calling_frame[3]
+            self.name = f"{module_name}:{func_name}"
+
         monitored_data: LoggingContextType = {}
         monitored_data.update({"context.time_to_run_μsec": int((time.time() - self.start_time) * 1e6)})
         for monitor in self._monitors:
             monitored_data.update(monitor.finish())
-        woodchipper.get_logger(__name__).info("Exiting context.", **monitored_data)
+        woodchipper.get_logger(module_name).info("Exiting context: %s", self.name, **monitored_data)
         assert self._token
         logging_ctx.reset(self._token)
         self._token = None
@@ -181,6 +193,9 @@ class LoggingContext:
         self.decorator_mapping = _build_path_head_to_param_config_map(
             self.injected_context, delimiter=self.path_delimiter
         )
+        if self.name is None:
+            module_name = f.__module__ or "<unknown>"
+            self.name = f"{module_name}:{f.__name__}"
 
         @wraps(f)
         def wrapper(*func_args, **func_kwargs):

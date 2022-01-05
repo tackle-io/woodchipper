@@ -11,7 +11,7 @@ from woodchipper.http.flask import WoodchipperFlask
 
 os.environ["WOODCHIPPER_KEY_PREFIX"] = "tkl"
 
-woodchipper.configure(config=DevLogToStdout, facilities={"app": "INFO", "werkzeug": "INFO", "flask": "INFO"})
+woodchipper.configure(config=DevLogToStdout, facilities={"": "INFO"})
 
 logger = woodchipper.get_logger(__name__)
 

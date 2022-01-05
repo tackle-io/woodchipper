@@ -13,6 +13,7 @@ class WoodchipperLambda:
             return self._app(environ, start_response)
         context = environ.get("lambda.context", object())
         with LoggingContext(
+            "awslambda:dispatch",
             **{
                 "aws-request-id": getattr(context, "aws_request_id", None),
                 "function-version": getattr(context, "function_version", None),
