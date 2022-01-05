@@ -35,7 +35,8 @@ def test_logging_context_var():
 
 def test_logging_context_prefix():
     assert context.logging_ctx.as_dict() == {}
-    with context.LoggingContext(a=1, _prefix="test"):
+    ctx_obj = context.LoggingContext("test-name", a=1, _prefix="test")
+    with ctx_obj:
         assert context.logging_ctx.as_dict() == {"test.a": 1}
 
     with patch("woodchipper.context.os.getenv", return_value="env"):
@@ -44,3 +45,33 @@ def test_logging_context_prefix():
 
     with context.LoggingContext(a=1, _prefix=None):
         assert context.logging_ctx.as_dict() == {"a": 1}
+
+
+def test_logging_context_name():
+    ctx_obj = context.LoggingContext("test-name", a=1, _prefix="test")
+    with ctx_obj:
+        assert ctx_obj.name == "test-name"
+    assert ctx_obj.name == "test-name"
+
+    ctx_obj = context.LoggingContext(a=1, _prefix="test")
+    with ctx_obj:
+        assert ctx_obj.name is None
+    assert ctx_obj.name == "test_context:test_logging_context_name"
+
+    ctx_obj = context.LoggingContext("test-name", a="x", _prefix="test")
+
+    @ctx_obj
+    def f(x):
+        assert ctx_obj.name == "test-name"
+
+    f(1)
+    assert ctx_obj.name == "test-name"
+
+    ctx_obj = context.LoggingContext(a="x", _prefix="test")
+
+    @ctx_obj
+    def f(x):
+        assert ctx_obj.name == "test_context:f"
+
+    f(1)
+    assert ctx_obj.name == "test_context:f"
