@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- AWS Lambda sentinel check
 - Packaging metadata to reflect the move under Tackle's aegis
+### Added
+
+- Names for logging contexts
 
 ## [v0.3] 30 December, 2021
 
