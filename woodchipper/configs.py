@@ -1,5 +1,6 @@
 import structlog
 
+import woodchipper.logger
 import woodchipper.processors
 from woodchipper import BaseConfigClass
 
@@ -19,7 +20,7 @@ class Minimal(BaseConfigClass):
         structlog.stdlib.add_log_level,
     ]
     factory = structlog.stdlib.LoggerFactory()
-    wrapper_class = structlog.stdlib.BoundLogger
+    wrapper_class = woodchipper.logger.BoundLogger
     renderer = structlog.processors.JSONRenderer()
 
 
@@ -37,7 +38,7 @@ class DevLogToStdout(BaseConfigClass):
         woodchipper.processors.inject_context_processor,
     ]
     factory = structlog.stdlib.LoggerFactory()
-    wrapper_class = structlog.stdlib.BoundLogger
+    wrapper_class = woodchipper.logger.BoundLogger
     renderer = structlog.dev.ConsoleRenderer()
 
 
@@ -56,5 +57,5 @@ class JSONLogToStdout(BaseConfigClass):
         woodchipper.processors.inject_context_processor,
     ]
     factory = structlog.stdlib.LoggerFactory()
-    wrapper_class = structlog.stdlib.BoundLogger
+    wrapper_class = woodchipper.logger.BoundLogger
     renderer = structlog.processors.JSONRenderer()
