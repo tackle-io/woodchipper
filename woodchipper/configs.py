@@ -1,4 +1,5 @@
 import logging
+import importlib
 import os
 
 import structlog
@@ -24,6 +25,15 @@ callsite_parameters = [
     structlog.processors.CallsiteParameter.LINENO,
     structlog.processors.CallsiteParameter.MODULE,
 ]
+
+
+# Users can override color style
+if os.getenv("WOODCHIPPER_COLOR_STYLE") is not None:
+    _style_mod_name, _style_var_name = os.getenv("WOODCHIPPER_COLOR_STYLE", "").rsplit(".", 1)
+    _style_mod = importlib.import_module(_style_mod_name)
+    _style_dict = getattr(_style_mod, _style_var_name)
+else:
+    _style_dict = None
 
 
 class Minimal(BaseConfigClass):
@@ -54,7 +64,9 @@ class DevLogToStdout(BaseConfigClass):
     ]
     factory = structlog.stdlib.LoggerFactory()
     wrapper_class = woodchipper.logger.BoundLogger
-    renderer = structlog.dev.ConsoleRenderer()
+    renderer = structlog.dev.ConsoleRenderer(
+        colors=not os.getenv("WOODCHIPPER_DISABLE_COLORS"), level_styles=_style_dict
+    )
 
 
 class JSONLogToStdout(BaseConfigClass):
