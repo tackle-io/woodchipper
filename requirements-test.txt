@@ -6,6 +6,8 @@
 #
 attrs==21.2.0
     # via pytest
+certifi==2021.10.8
+    # via sentry-sdk
 click==8.0.3
     # via flask
 flask==2.0.2
@@ -30,9 +32,15 @@ pyparsing==3.0.6
     # via packaging
 pytest==6
     # via -r requirements-test.in
+sentry-sdk==1.5.2
+    # via structlog-sentry
 sqlalchemy==1.4.28
+    # via -r requirements-test.in
+structlog-sentry==1.4.0
     # via -r requirements-test.in
 toml==0.10.2
     # via pytest
+urllib3==1.26.8
+    # via sentry-sdk
 werkzeug==2.0.2
     # via flask
