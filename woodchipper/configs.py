@@ -1,4 +1,19 @@
+import logging
+import os
+
 import structlog
+
+try:
+    from structlog_sentry import SentryJsonProcessor
+except ImportError:
+    # structlog_sentry is an optional dependency
+    # if not installed, make a no-op processor
+    class SentryJsonProcessor:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __call__(self, logger, name, event_dict):
+            return event_dict
 
 import woodchipper.logger
 import woodchipper.processors
@@ -52,6 +67,7 @@ class JSONLogToStdout(BaseConfigClass):
         woodchipper.processors.GitVersionProcessor(),
         structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S", utc=False),
         structlog.processors.CallsiteParameterAdder(parameters=callsite_parameters),
+        SentryJsonProcessor(level=logging.ERROR, as_extra=True, active=not os.getenv("WOODCHIPPER_DISABLE_SENTRY")),
         structlog.processors.format_exc_info,
         structlog.processors.UnicodeDecoder(),
         woodchipper.processors.inject_context_processor,
