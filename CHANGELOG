@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The environment variable set log key prefix is now appended to all logging context variables.
 - If `structlog-sentry` is installed, in `JSONLogToStdout`, error messages are emitted to Sentry.
+- Added ability to disable or customize colors in `DevLogToStdout` using environment variables
 
 ## [v0.4] 5 January, 2022
 
