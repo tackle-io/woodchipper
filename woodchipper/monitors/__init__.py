@@ -11,4 +11,4 @@ class BaseMonitor:
         raise NotImplementedError()
 
     def finish(self) -> Dict[str, LoggableValue]:
-        raise NotImplementedError
+        raise NotImplementedError()

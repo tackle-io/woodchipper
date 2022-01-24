@@ -44,6 +44,7 @@ class Minimal(BaseConfigClass):
 
     processors = [
         structlog.stdlib.add_log_level,
+        structlog.stdlib.add_logger_name,
     ]
     factory = structlog.stdlib.LoggerFactory()
     wrapper_class = woodchipper.logger.BoundLogger
@@ -60,7 +61,9 @@ class DevLogToStdout(BaseConfigClass):
         structlog.dev.set_exc_info,
         structlog.processors.UnicodeDecoder(),
         structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S", utc=False),
-        structlog.processors.CallsiteParameterAdder(parameters=callsite_parameters),
+        structlog.processors.CallsiteParameterAdder(
+            parameters=callsite_parameters, additional_ignores=["woodchipper"]
+        ),
         woodchipper.processors.inject_context_processor,
     ]
     factory = structlog.stdlib.LoggerFactory()
@@ -79,7 +82,9 @@ class JSONLogToStdout(BaseConfigClass):
         structlog.processors.StackInfoRenderer(),
         woodchipper.processors.GitVersionProcessor(),
         structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S", utc=False),
-        structlog.processors.CallsiteParameterAdder(parameters=callsite_parameters),
+        structlog.processors.CallsiteParameterAdder(
+            parameters=callsite_parameters, additional_ignores=["woodchipper"]
+        ),
         SentryJsonProcessor(level=logging.ERROR, as_extra=True, active=not os.getenv("WOODCHIPPER_DISABLE_SENTRY")),
         structlog.processors.format_exc_info,
         structlog.processors.UnicodeDecoder(),
