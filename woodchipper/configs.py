@@ -1,5 +1,5 @@
-import logging
 import importlib
+import logging
 import os
 
 import structlog
@@ -16,6 +16,7 @@ except ImportError:
         def __call__(self, logger, name, event_dict):
             return event_dict
 
+
 import woodchipper.logger
 import woodchipper.processors
 from woodchipper import BaseConfigClass
@@ -29,7 +30,7 @@ callsite_parameters = [
 
 # Users can override color style
 if os.getenv("WOODCHIPPER_COLOR_STYLE") is not None:
-    _style_mod_name, _style_var_name = os.getenv("WOODCHIPPER_COLOR_STYLE", "").rsplit(".", 1)
+    _style_mod_name, _style_var_name = os.environ["WOODCHIPPER_COLOR_STYLE"].rsplit(".", 1)
     _style_mod = importlib.import_module(_style_mod_name)
     _style_dict = getattr(_style_mod, _style_var_name)
 else:

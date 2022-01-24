@@ -1,4 +1,5 @@
 import importlib
+import os
 from unittest.mock import patch
 
 import woodchipper
@@ -28,7 +29,7 @@ def test_log_errors_to_sentry():
 
 def test_sentry_can_be_disabled():
     try:
-        with patch("os.getenv", return_value="1"):
+        with patch.dict(os.environ, {"WOODCHIPPER_DISABLE_SENTRY": "1"}):
             # With the patched environment variable getter, we have to reload configs for it to take effect
             importlib.reload(woodchipper.configs)
             woodchipper.configure(config=woodchipper.configs.JSONLogToStdout, facilities={"": "INFO"})
