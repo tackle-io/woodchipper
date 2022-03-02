@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNRELEASED]
 
+### Added
+
+- WSGI Flask adapter adds query param information to http.query_param namespace
+
 ## [v0.5] 16 February, 2022
 
 ### Added
