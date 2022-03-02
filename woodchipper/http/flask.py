@@ -23,7 +23,13 @@ class WoodchipperFlask:
                 "id": g.request_id,
                 "body_size": request.content_length,
                 "method": request.method,
-                "url": request.url,
+                "path": request.base_url,
+                **{
+                    f"query_param.{param_key.lower()}": param_val_list[0]
+                    if len(param_val_list) == 1
+                    else param_val_list
+                    for param_key, param_val_list in request.args.lists()
+                },
                 **{
                     f"header.{header.lower()}": ("******" if header.lower() in self._blacklisted_headers else value)
                     for header, value in request.headers.items()
