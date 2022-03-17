@@ -1,3 +1,4 @@
+import ast
 import json
 from unittest.mock import patch
 from urllib.parse import urlencode
@@ -17,7 +18,7 @@ def hello_world():
         return logging_ctx.as_dict()
 
 
-def test_flask_with_woodchipper():
+def test_flask_with_woodchipper(caplog):
     with patch("woodchipper.context.os.getenv", return_value="woodchip"):
         with app.test_client() as client:
             response = client.get("/")
@@ -27,6 +28,44 @@ def test_flask_with_woodchipper():
     assert response_json["http.method"] == "GET"
     assert response_json["http.header.host"] == "localhost"
     assert response_json["http.path"] == "http://localhost/"
+
+    # These logs won't be available until after the context has exited and the response as returned
+    flask_colon_request_exit_log = None
+    for log in caplog.records:
+        msg = ast.literal_eval(log.message)  # weirdly the log.message is a python dict that is a string
+        if msg["event"] == "Exiting context: flask:request":
+            flask_colon_request_exit_log = msg
+            break
+
+    assert (
+        flask_colon_request_exit_log is not None
+    ), "An exit message matching the flask:request pattern couldn't be found"
+    assert flask_colon_request_exit_log["http.response.status_code"] == 200
+    assert type(flask_colon_request_exit_log["http.response.content_length"]) is int
+
+
+@app.route("/raise_unhandled_exception")
+def raise_unhandled_exception():
+    raise ValueError("oh no!")
+
+
+def test_flask_raises_unhandled_exception(caplog):
+    with app.test_client() as client:
+        response = client.get("/raise_unhandled_exception")
+    assert response.status_code == 500
+
+    # These logs won't be available until after the context has exited and the response as returned
+    flask_colon_request_exit_log = None
+    for log in caplog.records:
+        msg = ast.literal_eval(log.message)  # weirdly the log.message is a python dict that is a string
+        if msg["event"] == "Exiting context: flask:request":
+            flask_colon_request_exit_log = msg
+            break
+
+    assert (
+        flask_colon_request_exit_log is not None
+    ), "An exit message matching the flask:request pattern couldn't be found"
+    assert flask_colon_request_exit_log["http.response.status_code"] == 500
 
 
 def test_flask_with_woodchipper_adds_query_params():
