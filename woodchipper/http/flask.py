@@ -2,7 +2,7 @@ import uuid
 
 from flask import g, request
 
-from woodchipper.context import LoggingContext
+from woodchipper.context import LoggingContext, logging_ctx
 
 BLACKLISTED_HEADERS = ["authorization", "cookie"]
 
@@ -37,7 +37,28 @@ class WoodchipperFlask:
             },
             _prefix="http",
         ):
-            return self.vanilla_full_dispatch_request()
+
+            try:
+                response = self.vanilla_full_dispatch_request()
+            except Exception:
+                # non HTTPErrors will not be caught by flask, so if that's
+                # happening we assume that it's crashing the response and
+                # thus 500 level
+                logging_ctx.update(
+                    {
+                        "http.response.status_code": 500,
+                    }
+                )
+                raise
+            else:
+
+                logging_ctx.update(
+                    {
+                        "http.response.status_code": response.status_code,
+                        "http.response.content_length": response.content_length,
+                    }
+                )
+                return response
 
     def chipperize(self):
         self._app.full_dispatch_request = self.wrapped_full_dispatch_request

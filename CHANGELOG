@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - WSGI Flask adapter adds query param information to http.query_param namespace
+- WSGI Flask adapter adds response status code and content length to exiting message of LoggingContext
 
 ## [v0.5] 16 February, 2022
 
