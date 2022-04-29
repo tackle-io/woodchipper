@@ -183,7 +183,9 @@ class LoggingContext:
         monitored_data.update({"context.time_to_run_μsec": int((time.time() - self.start_time) * 1e6)})
         for monitor in self._monitors:
             monitored_data.update(monitor.finish())
-        woodchipper.get_logger(module_name).info("Exiting context: %s", self.name, **monitored_data)
+        woodchipper.get_logger(module_name).info(
+            f"Exiting context: {self.name}", context_name=self.name, **monitored_data
+        )
         assert self._token
         logging_ctx.reset(self._token)
         self._token = None
