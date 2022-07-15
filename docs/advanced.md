@@ -17,7 +17,7 @@ with LoggingContext("custom-name", user=request.user.id):
 When this context exits, the message will use the custom name instead of the module and function name.
 
 {{< highlight shell "lineNos=true,anchorLineNos=true,lineAnchors=namingloggingcontextoutput" >}}
-2022-01-20 10:49.54 [info     ] Exiting context: custom-name [woodchipper.context] context.time_to_run_μsec=1318 func_name=<module> lineno=1 module=<stdin> user=1000
+2022-01-20 10:49.54 [info     ] Exiting context: custom-name [woodchipper.context] context.time_to_run_musec=1318 func_name=<module> lineno=1 module=<stdin> user=1000
 {{< /highlight >}}
 
 ## Namespacing context variables with a prefix

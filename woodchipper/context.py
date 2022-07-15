@@ -180,7 +180,7 @@ class LoggingContext:
             self.name = f"{module_name}:{func_name}"
 
         monitored_data: LoggingContextType = {}
-        monitored_data.update({"context.time_to_run_μsec": int((time.time() - self.start_time) * 1e6)})
+        monitored_data.update({"context.time_to_run_musec": int((time.time() - self.start_time) * 1e6)})
         for monitor in self._monitors:
             monitored_data.update(monitor.finish())
         woodchipper.get_logger(module_name).info(
