@@ -37,4 +37,4 @@ class SQLAlchemyMonitor(BaseMonitor):
     def finish(self):
         event.remove(self.engine, "before_cursor_execute", self.handle_before_event)
         event.remove(self.engine, "after_cursor_execute", self.handle_after_event)
-        return {"sql.statement_count": self.statement_count, "sql.total_db_time_μsec": int(self.total_db_time * 1e6)}
+        return {"sql.statement_count": self.statement_count, "sql.total_db_time_musec": int(self.total_db_time * 1e6)}

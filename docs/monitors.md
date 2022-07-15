@@ -64,4 +64,4 @@ With this monitor configured and installed, whenever a `LoggingContext` exits an
 exit, it will include two additional keys in that exit log message:
 
 * `sql.statement_count` - the number of SQL statements executed during that context
-* `sql.total_db_time_μsec` - the number of microseconds spent transacting with the database during that context
+* `sql.total_db_time_musec` - the number of microseconds spent transacting with the database during that context

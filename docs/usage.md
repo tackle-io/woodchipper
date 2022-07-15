@@ -140,6 +140,6 @@ any [monitors]({{< ref "monitors" >}}) you have configured. The output might loo
 {{< highlight shell "lineNos=true,anchorLineNos=true,lineAnchors=ctxloggingcontextoutput" >}}
 2022-01-20 10:49.54 [info     ] Starting core business logic.  [demo_app.core] func_name=awesome_business_logic lineno=8 module=core customer=ACMECORP user=1000
 2022-01-20 10:49.54 [info     ] Core business logic complete.  [demo_app.core] func_name=awesome_business_logic lineno=10 module=core customer=ACMECORP user=1000
-2022-01-20 10:49.54 [info     ] Exiting context: demo_app.routes:route_handler [woodchipper.context] context.time_to_run_μsec=5249 func_name=handle_request lineno=17 module=wsgi_app customer=ACMECORP user=1000
+2022-01-20 10:49.54 [info     ] Exiting context: demo_app.routes:route_handler [woodchipper.context] context.time_to_run_musec=5249 func_name=handle_request lineno=17 module=wsgi_app customer=ACMECORP user=1000
 
 {{< /highlight >}}
