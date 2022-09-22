@@ -24,6 +24,7 @@ class WoodchipperFlask:
                 "body_size": request.content_length,
                 "method": request.method,
                 "path": request.base_url,
+                "url_rule": request.url_rule.rule,
                 **{
                     f"query_param.{param_key.lower()}": param_val_list[0]
                     if len(param_val_list) == 1

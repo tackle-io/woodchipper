@@ -88,3 +88,19 @@ def test_flask_with_woodchipper_adds_query_params():
     assert response_json["http.query_param.key3"] == "value3"
     assert response_json["http.query_param.key4"] == ""
     assert response_json["http.path"] == "http://localhost/"  # confirms that querystring isn't included
+
+
+@app.route("/path/<string:_url_rule_pattern>")
+def path_with_url_pattern(_url_rule_pattern):
+    with LoggingContext(testvar="testval"):
+        return logging_ctx.as_dict()
+
+
+def test_flask_shows_url_rule():
+    with patch("woodchipper.context.os.getenv", return_value="woodchip"):
+        with app.test_client() as client:
+            response = client.get("/path/some_path_param")
+
+    assert response.status_code == 200
+    response_json = json.loads(response.data)
+    assert response_json["http.url_rule"] == "/path/<string:_url_rule_pattern>"
