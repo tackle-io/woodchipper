@@ -17,6 +17,12 @@ class WoodchipperFlask:
     def wrapped_full_dispatch_request(self):
         if not getattr(g, "request_id", None):
             g.request_id = self._request_id_factory()
+
+        if request.url_rule is None:
+            url_rule_entries = {"url_rule": None}
+        else:
+            url_rule_entries = {"url_rule.rule": request.url_rule.rule}
+
         with LoggingContext(
             "flask:request",
             **{
@@ -24,6 +30,7 @@ class WoodchipperFlask:
                 "body_size": request.content_length,
                 "method": request.method,
                 "path": request.base_url,
+                **url_rule_entries,
                 **{
                     f"query_param.{param_key.lower()}": param_val_list[0]
                     if len(param_val_list) == 1

@@ -88,3 +88,40 @@ def test_flask_with_woodchipper_adds_query_params():
     assert response_json["http.query_param.key3"] == "value3"
     assert response_json["http.query_param.key4"] == ""
     assert response_json["http.path"] == "http://localhost/"  # confirms that querystring isn't included
+
+
+@app.route("/path/<string:_url_rule_pattern>")
+def path_with_url_pattern(_url_rule_pattern):
+    with LoggingContext(testvar="testval"):
+        return logging_ctx.as_dict()
+
+
+def test_flask_shows_url_rule():
+    """Test that http.url_rule details are present when the path matches a Flask routing rule."""
+    with app.test_client() as client:
+        response = client.get("/path/some_path_param")
+
+    assert response.status_code == 200
+    response_json = json.loads(response.data)
+    assert response_json["http.url_rule.rule"] == "/path/<string:_url_rule_pattern>"
+
+
+def test_flask_adapter_shows_none_for_url_rule_value_when_no_matching_rule(caplog):
+    """Test that http.url_rule details are absent when no rule matches the path."""
+    with app.test_client() as client:
+        response = client.get("/path_to_no_where")
+
+    assert response.status_code == 404
+
+    flask_colon_request_exit_log = None
+    for log in caplog.records:
+        msg = ast.literal_eval(log.message)
+        if msg["event"] == "Exiting context: flask:request":
+            flask_colon_request_exit_log = msg
+            break
+
+    assert (
+        flask_colon_request_exit_log is not None
+    ), "An exit message matching the flask:request pattern couldn't be found"
+    assert flask_colon_request_exit_log["http.url_rule"] is None
+    assert "http.url_rule.rule" not in flask_colon_request_exit_log
