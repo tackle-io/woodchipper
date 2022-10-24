@@ -61,6 +61,26 @@ flask.WoodchipperFlask(app).chipperize()
 The `WoodchipperFlask` constructor also takes an optional kwarg parameter `request_id_factory`. By passing to this
 parameter an argumentless callable, you can customize how the unique request ID is generated.
 
+## Using Woodchipper with FastAPI
+
+Woodchipper ships with a built-in FastAPI integration, which wraps the entire request/response cycle in a
+`LoggingContext`, which adds headers and other basic request information to the context, including a unique ID for
+each request. Each of the keys in the context added by this integration will be prefixed with `http`.
+
+To enable the FastAPI integration, you have to modify the `FastAPI` app instance.
+
+{{< highlight python "lineNos=true,anchorLineNos=true,lineAnchors=flask" >}}
+from fastapi import FastAPI
+from woodchipper.http.fastapi import WoodchipperFastAPI
+
+app = FastAPI()
+WoodchipperFastAPI(app).chipperize()
+{{< /highlight >}}
+
+The `WoodchipperFastAPI` constructor also takes an optional kwarg parameter `request_id_factory`. By passing to this
+parameter an argumentless callable, you can customize how the unique request ID is generated.
+
+
 ## Using Woodchipper with AWS Lambda
 
 Woodchipper ships with a built-in AWS Lambda integration when using [Zappa](https://github.com/Zappa/zappa), which
