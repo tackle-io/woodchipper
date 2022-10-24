@@ -1,4 +1,7 @@
+-r requirements.txt
 pytest==6
 flask
+fastapi
 SQLAlchemy
 structlog-sentry
+requests

@@ -151,7 +151,13 @@ class LoggingContext:
     start_time: float
 
     def __init__(
-        self, name=None, *, _prefix=missing, _missing_default=missing, _path_delimiter=".", **kwargs: LoggableValue
+        self,
+        name=None,
+        *,
+        _prefix: Union[str, Missing] = missing,
+        _missing_default=missing,
+        _path_delimiter=".",
+        **kwargs: LoggableValue,
     ):
         self.name = name
         self.injected_context = kwargs
