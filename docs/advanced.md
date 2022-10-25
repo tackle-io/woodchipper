@@ -84,7 +84,9 @@ app.wsgi_app = WoodchipperLambda(app.wsgi_app)
 {{< /highlight >}}
 
 ## Using Woodchipper with Sentry
-
-If you're using the `JSONLogToStdout` configuration and you have installed
-[structlog-sentry](https://github.com/kiwicom/structlog-sentry), Woodchipper will handle emitting error-level log
+There is an optional dependency for [structlog-sentry](https://github.com/kiwicom/structlog-sentry) that can be install
+using `pip install woodchipper[sentry]`. If you're using the `JSONLogToStdout` configuration and have the optional dependency installed, Woodchipper will handle emitting error-level log
 messages from your application to Sentry. You are still responsible for configuring the Sentry SDK yourself.
+
+**NOTE** As of right now we do not support structlog-sentry >= 2.0.0. If you installed `structlog-sentry` before it was added
+as an optional dependency make sure you have it pinned to a version below 2.0.0.
