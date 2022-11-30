@@ -31,3 +31,43 @@ class GitVersionProcessor:
         except (OSError, json.JSONDecodeError):
             pass
         return event_dict
+
+
+class DatadogTraceProcessor:
+    """
+    Adds Datadog trace information via the ddtrace library if it is installed
+    """
+
+    def __init__(self) -> None:
+        pass
+
+    def __call__(self, logger: logging.Logger, method: str, event_dict: dict) -> dict:
+        # Adapted from
+        # https://docs.datadoghq.com/tracing/other_telemetry/connect_logs_and_traces/python/#no-standard-library-logging
+        try:
+            import ddtrace
+            from ddtrace import tracer
+        except ImportError:
+            # ddtrace is an optional dependency
+            # if not installed, no-op the event
+            return event_dict
+
+        # get correlation ids from current tracer context
+        span = tracer.current_span()
+        trace_id, span_id = (span.trace_id, span.span_id) if span else (None, None)
+
+        # add ids to structlog event dictionary
+        if trace_id:
+            event_dict["dd.trace_id"] = str(trace_id)
+        if span_id:
+            event_dict["dd.span_id"] = str(span_id)
+
+        # add the env, service, and version configured for the tracer
+        if ddtrace.config.env:
+            event_dict["dd.env"] = ddtrace.config.env
+        if ddtrace.config.service:
+            event_dict["dd.service"] = ddtrace.config.service
+        if ddtrace.config.version:
+            event_dict["dd.version"] = ddtrace.config.version
+
+        return event_dict
