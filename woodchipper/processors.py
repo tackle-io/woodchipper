@@ -3,6 +3,15 @@ import logging
 
 from woodchipper import context
 
+_ddtrace_present = False
+try:
+    import ddtrace
+    from ddtrace import tracer
+
+    _ddtrace_present = True
+except ImportError:
+    pass
+
 
 def inject_context_processor(logger: logging.Logger, method: str, event_dict: dict):
     """
@@ -44,12 +53,7 @@ class DatadogTraceProcessor:
     def __call__(self, logger: logging.Logger, method: str, event_dict: dict) -> dict:
         # Adapted from
         # https://docs.datadoghq.com/tracing/other_telemetry/connect_logs_and_traces/python/#no-standard-library-logging
-        try:
-            import ddtrace
-            from ddtrace import tracer
-        except ImportError:
-            # ddtrace is an optional dependency
-            # if not installed, no-op the event
+        if not _ddtrace_present:
             return event_dict
 
         # get correlation ids from current tracer context
