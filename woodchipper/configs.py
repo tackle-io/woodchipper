@@ -60,7 +60,7 @@ class DevLogToStdout(BaseConfigClass):
         structlog.processors.StackInfoRenderer(),
         structlog.dev.set_exc_info,
         structlog.processors.UnicodeDecoder(),
-        structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S", utc=False),
+        structlog.processors.TimeStamper(fmt="iso", utc=False),
         structlog.processors.CallsiteParameterAdder(
             parameters=callsite_parameters, additional_ignores=["woodchipper"]
         ),
@@ -82,7 +82,7 @@ class JSONLogToStdout(BaseConfigClass):
         structlog.processors.StackInfoRenderer(),
         woodchipper.processors.GitVersionProcessor(),
         woodchipper.processors.DatadogTraceProcessor(),
-        structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S", utc=False),
+        structlog.processors.TimeStamper(fmt="iso", utc=True),
         structlog.processors.CallsiteParameterAdder(
             parameters=callsite_parameters, additional_ignores=["woodchipper"]
         ),
