@@ -8,7 +8,7 @@ anyio==3.6.2
     # via starlette
 attrs==21.2.0
     # via pytest
-certifi==2021.10.8
+certifi==2022.12.7
     # via
     #   requests
     #   sentry-sdk
@@ -20,6 +20,8 @@ fastapi==0.85.1
     # via -r requirements-test.in
 flask==2.0.2
     # via -r requirements-test.in
+greenlet==2.0.1
+    # via sqlalchemy
 idna==3.4
     # via
     #   anyio
@@ -63,9 +65,7 @@ structlog-sentry==1.4.0
 toml==0.10.2
     # via pytest
 typing-extensions==4.4.0
-    # via
-    #   pydantic
-    #   starlette
+    # via pydantic
 urllib3==1.26.8
     # via
     #   requests
