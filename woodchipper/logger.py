@@ -43,6 +43,4 @@ class BoundLogger(StdlibBoundLogger):
     def _proxy_to_logger(
         self, method_name: str, event: Optional[str] = None, *event_args: str, **event_kw: Any
     ) -> Any:
-        return super()._proxy_to_logger(
-            method_name, event, *event_args, **(self.prefix_kwargs(**event_kw) if self.key_prefix else event_kw)
-        )
+        return super()._proxy_to_logger(method_name, event, *event_args, **self.prefix_kwargs(**event_kw))
