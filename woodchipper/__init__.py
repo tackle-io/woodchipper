@@ -61,7 +61,7 @@ def configure(
         wrapper_class=config.wrapper_class,
         context_class=dict,
         logger_factory=config.factory,
-        cache_logger_on_first_use=False,
+        cache_logger_on_first_use=True,
     )
 
 
