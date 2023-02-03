@@ -7,7 +7,7 @@ NO_PREFIX_LIST = ["exc_info"]
 
 
 class BoundLogger(StdlibBoundLogger):
-    key_prefix: str = ""
+    __key_prefix__: str = ""
 
     def __init__(self, *args, **kwargs):
         self.key_prefix = os.getenv("WOODCHIPPER_KEY_PREFIX", "")
