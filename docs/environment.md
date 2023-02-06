@@ -13,6 +13,8 @@ If set, any context variable emitted that does not have an explicit prefix set f
 For example, if you set this environment variable to `tackle`, then a key `user` would appear in log messages as
 `tackle.user`.
 
+If you want to override this, call the clear_prefix() function on the logger once initialized.
+
 ### `WOODCHIPPER_DISABLE_SENTRY`
 
 If set to a non-empty value, the built-in Sentry integration will be disabled.
