@@ -20,6 +20,8 @@ fastapi==0.85.1
     # via -r requirements-test.in
 flask==2.0.2
     # via -r requirements-test.in
+greenlet==2.0.2
+    # via sqlalchemy
 idna==3.4
     # via
     #   anyio
@@ -30,8 +32,10 @@ itsdangerous==2.0.1
     # via flask
 jinja2==3.0.3
     # via flask
-markupsafe==2.0.1
-    # via jinja2
+markupsafe==2.1.2
+    # via
+    #   jinja2
+    #   werkzeug
 more-itertools==8.12.0
     # via pytest
 packaging==21.3
@@ -63,12 +67,10 @@ structlog-sentry==1.4.0
 toml==0.10.2
     # via pytest
 typing-extensions==4.4.0
-    # via
-    #   pydantic
-    #   starlette
+    # via pydantic
 urllib3==1.26.8
     # via
     #   requests
     #   sentry-sdk
-werkzeug==2.0.2
+werkzeug==2.2.3
     # via flask
