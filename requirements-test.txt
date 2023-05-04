@@ -18,7 +18,7 @@ click==8.0.3
     # via flask
 fastapi==0.85.1
     # via -r requirements-test.in
-flask==2.0.2
+flask==2.2.5
     # via -r requirements-test.in
 idna==3.4
     # via
