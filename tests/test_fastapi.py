@@ -7,11 +7,10 @@ from fastapi.testclient import TestClient
 import woodchipper
 from woodchipper.configs import DevLogToStdout
 from woodchipper.context import LoggingContext, logging_ctx
-from woodchipper.http.fastapi import WoodchipperFastAPI
+from woodchipper.http.fastapi import install_woodchipper_middleware
 
 app = FastAPI()
-WoodchipperFastAPI(app).chipperize()
-
+install_woodchipper_middleware(app)
 client = TestClient(app)
 
 woodchipper.configure(
@@ -70,7 +69,7 @@ def test_fastapi_with_woodchipper_adds_query_params():
 
 def test_fastapi_header_blacklist():
     app = FastAPI()
-    WoodchipperFastAPI(app, blacklisted_headers=["host"]).chipperize()
+    install_woodchipper_middleware(app, blacklisted_headers=["host"])
     client = testclient.TestClient(app)
 
     @app.get("/")
@@ -85,7 +84,7 @@ def test_fastapi_header_blacklist():
 
 def test_fastapi_gen_id():
     app = FastAPI()
-    WoodchipperFastAPI(app, request_id_factory=lambda: "id").chipperize()
+    install_woodchipper_middleware(app, request_id_factory=lambda: "id")
     client = testclient.TestClient(app)
 
     @app.get("/")
@@ -100,7 +99,7 @@ def test_fastapi_gen_id():
 
 def test_fastapi_uncaught_error(caplog):
     app = FastAPI()
-    WoodchipperFastAPI(app, request_id_factory=lambda: "id").chipperize()
+    install_woodchipper_middleware(app, request_id_factory=lambda: "id")
     client = testclient.TestClient(app, raise_server_exceptions=False)
 
     @app.get("/")
