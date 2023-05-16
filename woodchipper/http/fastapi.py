@@ -8,7 +8,7 @@ from woodchipper.context import LoggingContext, logging_ctx
 BLACKLISTED_HEADERS = ["authorization", "cookie"]
 
 
-class WoodchipperFastAPIMiddleware(BaseHTTPMiddleware):
+class WoodchipperFastAPI(BaseHTTPMiddleware):
     def __init__(
         self,
         app: FastAPI,
@@ -63,8 +63,9 @@ class WoodchipperFastAPIMiddleware(BaseHTTPMiddleware):
 
                 return response
 
-
-def install_woodchipper_middleware(app: FastAPI, blacklisted_headers=BLACKLISTED_HEADERS, request_id_factory=None):
-    app.add_middleware(
-        WoodchipperFastAPIMiddleware, blacklisted_headers=blacklisted_headers, request_id_factory=request_id_factory
-    )
+    def chipperize(self):
+        self.app.add_middleware(
+            WoodchipperFastAPI,
+            blacklisted_headers=self._blacklisted_headers,
+            request_id_factory=self._request_id_factory,
+        )
