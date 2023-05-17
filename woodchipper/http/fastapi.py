@@ -16,8 +16,20 @@ class WoodchipperFastAPI(BaseHTTPMiddleware):
         blacklisted_headers=BLACKLISTED_HEADERS,
     ):
         super().__init__(app)
+        self._app = app
         self._blacklisted_headers = blacklisted_headers
         self._request_id_factory = request_id_factory or (lambda: str(uuid.uuid4()))
+
+    def _wrap_build_middleware_stack(self, original_fn):
+        def __wrapped__():
+            fastapi_app = original_fn()
+            return WoodchipperFastAPI(
+                app=fastapi_app,
+                blacklisted_headers=self._blacklisted_headers,
+                request_id_factory=self._request_id_factory,
+            )
+
+        return __wrapped__
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         # When the request object parses query params it doesn't combine repeat
@@ -64,8 +76,4 @@ class WoodchipperFastAPI(BaseHTTPMiddleware):
                 return response
 
     def chipperize(self):
-        self.app.add_middleware(
-            WoodchipperFastAPI,
-            blacklisted_headers=self._blacklisted_headers,
-            request_id_factory=self._request_id_factory,
-        )
+        self._app.build_middleware_stack = self._wrap_build_middleware_stack(self._app.build_middleware_stack)
