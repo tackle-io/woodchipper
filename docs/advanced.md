@@ -69,12 +69,27 @@ each request. Each of the keys in the context added by this integration will be 
 
 To enable the FastAPI integration, you have to modify the `FastAPI` app instance.
 
+There are two ways to do this. The first, chipperize() is the recommended approach to get accurate timing data
+in most cases-- it ensures the Woodchipper middleware is the first in the middleware stack.
+However, if you also have Datadog's DDTrace middleware installed on the same application, chipperize may cause
+tracing to break. In those cases, manual installation (see second example) is preferred.
+
+Chipperize:
 {{< highlight python "lineNos=true,anchorLineNos=true,lineAnchors=flask" >}}
 from fastapi import FastAPI
 from woodchipper.http.fastapi import WoodchipperFastAPI
 
 app = FastAPI()
 WoodchipperFastAPI(app).chipperize()
+{{< /highlight >}}
+
+Manual installation:
+{{< highlight python "lineNos=true,anchorLineNos=true,lineAnchors=flask" >}}
+from fastapi import FastAPI
+from woodchipper.http.fastapi import WoodchipperFastAPI
+
+app = FastAPI()
+app.add_middleware(WoodchipperFastAPI)
 {{< /highlight >}}
 
 The `WoodchipperFastAPI` constructor also takes an optional kwarg parameter `request_id_factory`. By passing to this
