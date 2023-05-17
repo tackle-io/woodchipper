@@ -121,3 +121,32 @@ def test_fastapi_uncaught_error(caplog):
             break
 
     assert fastapi_colon_request_exit_log["http.response.status_code"] == 500
+
+
+def test_alternate_installation(caplog):
+    # If users do not want to use chipperize, which overrides the middleware installation order,
+    # they can install using the typical FastAPI add_middleware pattern
+    app = FastAPI()
+    app.add_middleware(WoodchipperFastAPI)
+    with patch("woodchipper.context.os.getenv", return_value="woodchip"):
+        response = client.get("/")
+
+    assert response.status_code == 200
+    assert response.json()["woodchip.testvar"] == "testval"
+    assert response.json()["http.method"] == "GET"
+    assert response.json()["http.header.host"] == "testserver"
+    assert response.json()["http.path"] == "http://testserver/"
+
+    # These logs won't be available until after the context has exited and the response as returned
+    fastapi_colon_request_exit_log = None
+    for log in caplog.records:
+        msg = ast.literal_eval(log.message)  # weirdly the log.message is a python dict that is a string
+        if msg["event"] == "Exiting context: fastapi:request":
+            fastapi_colon_request_exit_log = msg
+            break
+
+    assert (
+        fastapi_colon_request_exit_log is not None
+    ), "An exit message matching the flask:request pattern couldn't be found"
+    assert fastapi_colon_request_exit_log["http.response.status_code"] == 200
+    assert type(fastapi_colon_request_exit_log["http.response.content_length"]) is int
