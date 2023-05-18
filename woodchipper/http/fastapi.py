@@ -1,7 +1,8 @@
 import uuid
-from typing import Any, Callable, Coroutine
+from typing import Callable
 
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 from woodchipper.context import LoggingContext, logging_ctx
 
@@ -9,72 +10,74 @@ BLACKLISTED_HEADERS = ["authorization", "cookie"]
 
 
 class WoodchipperFastAPI:
-    def __init__(self, app: FastAPI, blacklisted_headers=BLACKLISTED_HEADERS, request_id_factory=None):
+    def __init__(
+        self,
+        app: FastAPI,
+        request_id_factory=None,
+        blacklisted_headers=BLACKLISTED_HEADERS,
+    ):
         self._app = app
         self._blacklisted_headers = blacklisted_headers
         self._request_id_factory = request_id_factory or (lambda: str(uuid.uuid4()))
 
-    def get_custom_route_handler(self, gen_id, blacklisted_headers):
-        def get_route_handler(self) -> Callable[[Request], Coroutine[Any, Any, Response]]:
+    def _wrap_build_middleware_stack(self, original_fn: Callable) -> Callable:
+        def __wrapped__() -> ASGIApp:
+            asgi_app = original_fn()
+            return WoodchipperFastAPI(
+                app=asgi_app,
+                blacklisted_headers=self._blacklisted_headers,
+                request_id_factory=self._request_id_factory,
+            )
 
-            original_route_handler = super(type(self), self).get_route_handler()
+        return __wrapped__
 
-            async def woodchipper_route_handler(request: Request) -> Response:
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        # When the request object parses query params it doesn't combine repeat
+        # params into a list. This doesn't happen until FastAPI is preparing to
+        # call the handling function. We do want to see repeat params as a list so
+        # we combine them here.
+        if scope["type"] != "http":
+            return await self._app(scope, receive, send)
+        request = Request(scope)
+        queries = {}
+        for k, v in request.query_params.multi_items():
+            if k in queries and not isinstance(queries[k], list):
+                queries[k] = [queries[k], v]
+            elif k in queries:
+                queries[k].append(v)
+            else:
+                queries[k] = v
 
-                # When the request object parses query params it doesn't combine repeat
-                # params into a list. This doesn't happen until FastAPI is preparing to
-                # call the handling function. We do want to see repeat params as a list so
-                # we combine them here.
-                queries = {}
-                for k, v in request.query_params.multi_items():
-                    if k in queries and not isinstance(queries[k], list):
-                        queries[k] = [queries[k], v]
-                    elif k in queries:
-                        queries[k].append(v)
-                    else:
-                        queries[k] = v
+        async def send_with_extra_headers(message):
+            if message["type"] == "http.response.start":
+                logging_ctx.update(
+                    {
+                        "http.response.status_code": message["status"],
+                        "http.response.content_length": int(dict(message["headers"]).get(b"content-length", 0)),
+                    }
+                )
+            return await send(message)
 
-                with LoggingContext(
-                    "fastapi:request",
-                    **{
-                        "id": gen_id(),
-                        "body_size": int(request.headers.get("content-length", 0)),
-                        "method": request.method,
-                        "path": request.base_url._url,
-                        **{f"query_param.{k.lower()}": v for k, v in queries.items()},
-                        **{
-                            f"header.{k.lower()}": (v if k.lower() not in blacklisted_headers else "******")
-                            for k, v in request.headers.items()
-                        },
-                    },
-                    _prefix="http",
-                ):
-                    try:
-                        response: Response = await original_route_handler(request)
-                    except Exception as e:
-                        logging_ctx.update({"http.response.status_code": 500})
-                        raise e
-                    else:
-                        logging_ctx.update(
-                            {
-                                "http.response.status_code": response.status_code,
-                                "http.response.content_length": int(response.headers.get("content-length", 0)),
-                            }
-                        )
-                        return response
-
-            return woodchipper_route_handler
-
-        return get_route_handler
-
-    def get_logging_route_class(self):
-        return type(
-            "WoodChipperApiRoute",
-            (
-                self._app.router.route_class,
-            ),  # This allows us to handle cases where the routeclass has already been replaced
-            {"get_route_handler": self.get_custom_route_handler(self._request_id_factory, self._blacklisted_headers)},
-        )
+        with LoggingContext(
+            "fastapi:request",
+            **{
+                "id": self._request_id_factory(),
+                "body_size": int(request.headers.get("content-length", 0)),
+                "method": request.method,
+                "path": request.base_url._url,
+                **{f"query_param.{k.lower()}": v for k, v in queries.items()},
+                **{
+                    f"header.{k.lower()}": (v if k.lower() not in self._blacklisted_headers else "******")
+                    for k, v in request.headers.items()
+                },
+            },
+            _prefix="http",
+        ):
+            try:
+                await self._app(scope, receive, send_with_extra_headers)
+            except Exception:
+                logging_ctx.update({"http.response.status_code": 500})
+                raise
 
     def chipperize(self):
-        self._app.router.route_class = self.get_logging_route_class()
+        self._app.build_middleware_stack = self._wrap_build_middleware_stack(self._app.build_middleware_stack)
