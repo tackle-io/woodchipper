@@ -16,7 +16,6 @@ class WoodchipperFastAPI:
         request_id_factory=None,
         blacklisted_headers=BLACKLISTED_HEADERS,
     ):
-        super().__init__()
         self._app = app
         self._blacklisted_headers = blacklisted_headers
         self._request_id_factory = request_id_factory or (lambda: str(uuid.uuid4()))
@@ -33,10 +32,10 @@ class WoodchipperFastAPI:
         return __wrapped__
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        #     # When the request object parses query params it doesn't combine repeat
-        #     # params into a list. This doesn't happen until FastAPI is preparing to
-        #     # call the handling function. We do want to see repeat params as a list so
-        #     # we combine them here.
+        # When the request object parses query params it doesn't combine repeat
+        # params into a list. This doesn't happen until FastAPI is preparing to
+        # call the handling function. We do want to see repeat params as a list so
+        # we combine them here.
         if scope["type"] != "http":
             return await self._app(scope, receive, send)
         request = Request(scope)
@@ -76,9 +75,9 @@ class WoodchipperFastAPI:
         ):
             try:
                 await self._app(scope, receive, send_with_extra_headers)
-            except Exception as e:
+            except Exception:
                 logging_ctx.update({"http.response.status_code": 500})
-                raise e
+                raise
 
     def chipperize(self):
         self._app.build_middleware_stack = self._wrap_build_middleware_stack(self._app.build_middleware_stack)
