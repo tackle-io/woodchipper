@@ -64,7 +64,7 @@ class WoodchipperFastAPI:
                 "id": self._request_id_factory(),
                 "body_size": int(request.headers.get("content-length", 0)),
                 "method": request.method,
-                "path": request.base_url._url,
+                "path": str(request.base_url)[:-1] + request.url.path if request.url.path else request.base_url,
                 **{f"query_param.{k.lower()}": v for k, v in queries.items()},
                 **{
                     f"header.{k.lower()}": (v if k.lower() not in self._blacklisted_headers else "******")
