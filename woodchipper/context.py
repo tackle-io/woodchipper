@@ -207,7 +207,6 @@ class LoggingContext:
 
         @wraps(f)
         def wrapper(*func_args, **func_kwargs):
-
             # This will pair up the function signature parameters with the arguments that were passed. It's ...amazing.
             # If we wanted to apply defaults as well (that weren't passed but were defined as defaults in the
             # signature, there's a fairly easy process for that too through this api as well).

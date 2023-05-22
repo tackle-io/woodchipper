@@ -1,0 +1,15 @@
+site_name: Woodchipper
+site_url: https://woodchipper.readthedocs.org/
+repo_url: https://github.com/tackle-io/woodchipper
+site_description: Smart, structured logging in Python on top of structlog
+site_author: Tackle.io
+copyright: Copyright (c) 2023 Tackle.io, Inc.
+nav:
+  - Intro: 'index.md'
+  - usage.md
+  - advanced.md
+  - environment.md
+  - monitors.md
+theme:
+    name: readthedocs
+    highlightjs: true

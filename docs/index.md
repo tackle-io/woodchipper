@@ -17,7 +17,7 @@ system like ELK, CloudWatch, or DataDog.
 
 Adding Woodchipper to a Python project is easy.
 
-{{< highlight python "lineNos=true,anchorLineNos=true,lineAnchors=quickstart" >}}
+```python
 import os
 
 import woodchipper
@@ -35,13 +35,13 @@ woodchipper.configure(
 logger = woodchipper.get_logger(__name__)
 
 logger.info("Woodchipper configured.", env=os.getenv("FLASK_ENV"))
-{{< /highlight >}}
+```
 
 If we run the above, setting `FLASK_ENV` to `development`, we get:
 
-{{< highlight shell "lineNos=true,anchorLineNos=true,lineAnchors=qs-out-dev" >}}
+```
 2022-01-14 10:57.49 [info     ] Woodchipper configured.        [__main__] func_name=<module> lineno=17 module=demo env=development
-{{< /highlight >}}
+```
 
 Our log output not only contains the logger name, logger level, and log event, but it also contains details
 about where in the code the log message was emitted and the extra key/value pair we provided about the
@@ -49,6 +49,6 @@ environment name.
 
 If we run it without `FLASK_ENV` set to `production`, we get JSON output:
 
-{{< highlight json "lineNos=true,anchorLineNos=true,lineAnchors=qs-out-prod" >}}
+```json
 {"env": "production", "event": "Woodchipper configured.", "level": "info", "logger": "__main__", "timestamp": "2022-01-14 11:08.30", "func_name": "<module>", "lineno": 17, "module": "demo"}
-{{< /highlight >}}
+```

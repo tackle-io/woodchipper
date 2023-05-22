@@ -37,7 +37,6 @@ class WoodchipperFlask:
             },
             _prefix="http",
         ):
-
             try:
                 response = self.vanilla_full_dispatch_request()
             except Exception:
@@ -51,7 +50,6 @@ class WoodchipperFlask:
                 )
                 raise
             else:
-
                 logging_ctx.update(
                     {
                         "http.response.status_code": response.status_code,

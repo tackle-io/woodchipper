@@ -9,9 +9,8 @@ repos:
       - id: check-json
       - id: check-merge-conflict
       - id: debug-statements
-      - id: detect-aws-credentials
   - repo: https://github.com/psf/black
-    rev: 22.3.0
+    rev: 23.1.0
     hooks:
       - id: black
         language_version: python3
@@ -31,3 +30,9 @@ repos:
     hooks:
       - id: bandit
         args: ["-r", "-ll", "-ii"]
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.3.1
+    hooks:
+    -   id: pyupgrade
+        args:
+          - "--py38-plus"
