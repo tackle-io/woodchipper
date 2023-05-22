@@ -32,7 +32,7 @@ The `configure` function takes a number of optional keyword arguments.
   `requests` library, in which case, only messages at `WARNING` or above will be handled.
 * `override_existing` (default: `True`) determines whether the logging configuration will disable existing loggers
   or not.
-* `monitors` is a list of [monitor]({{< ref "monitors" >}}) that you want enabled on the logger.
+* `monitors` is a list of [monitor]({{../monitors}}) that you want enabled on the logger.
 
 ## Getting a logger
 
@@ -52,9 +52,9 @@ Every log message you emit has the possibility of adding context to it simply by
 imagine you have defined an object `customer` with an attribute `id`. To log the customer ID along with the log
 message, you might have a message like:
 
-{{< highlight python "lineNos=true,anchorLineNos=true,lineAnchors=ctxoneline" >}}
+```python
 logger.info("Customer logged in.", customer_id=customer.id)
-{{< /highlight >}}
+```
 
 With this log message, it's very easy to query your log management system for log messages with this same event,
 because it's constant. Then you can group and count by `customer_id` values to count how often which customers are
@@ -68,7 +68,7 @@ those key/value pairs to the logger within the function. This is comparable to a
 [LoggerAdapter](https://docs.python.org/3/library/logging.html#loggeradapter-objects) object from the Python standard
 library logging.
 
-{{< highlight python "lineNos=true,anchorLineNos=true,lineAnchors=ctxbind" >}}
+```python
 import woodchipper
 
 logger = woodchipper.get_logger(__name__)
@@ -78,7 +78,7 @@ def view_function(request: HttpRequest) -> HttpResponse:
     local_logger.info("View function starting.")
     # ... snip ...
     local_logger.info("View function complete.")
-{{< /highlight >}}
+```
 
 Each log message emitted using `local_logger` will contain the context variable `user` without needing to explicitly
 include it in each log message.
@@ -90,8 +90,7 @@ around a logger instance you've `.bind()`'ed with that context or re-`.bind()`'i
 can use `woodchipper.context.LoggingContext` to set context variables that follow across your entire codebase until
 that context is exited. `LoggingContext` can be used as a context manager or as a decorator.
 
-{{< highlight python "lineNos=true,anchorLineNos=true,lineAnchors=ctxloggingcontext" >}}
-
+```python
 # core.py
 import woodchipper
 
@@ -122,8 +121,7 @@ def route_handler(request, customer_id):
 def route_handler(request, customer_id):
     result = core.awesome_business_logic(customer_id)
     return {"result": result}
-
-{{< /highlight >}}
+```
 
 Both of the implementations of `route_handler` are effectively equivalent. Any log messages emitted from anywhere,
 including from `core.py`, will include it its context the key/value pairs passed to LoggingContext.
@@ -135,11 +133,10 @@ access. For example, in the decorator, `"foo.bar"` could resolve to `foo.bar` or
 
 Additionally, when the context ends, a log message is emitted indicating the `LoggingContext` has been exited, with
 context key/value pairs that include the time it took to execute the code in that context as well as the output of
-any [monitors]({{< ref "monitors" >}}) you have configured. The output might look like:
+any [monitors](../monitors) you have configured. The output might look like:
 
-{{< highlight shell "lineNos=true,anchorLineNos=true,lineAnchors=ctxloggingcontextoutput" >}}
+```
 2022-01-20 10:49.54 [info     ] Starting core business logic.  [demo_app.core] func_name=awesome_business_logic lineno=8 module=core customer=ACMECORP user=1000
 2022-01-20 10:49.54 [info     ] Core business logic complete.  [demo_app.core] func_name=awesome_business_logic lineno=10 module=core customer=ACMECORP user=1000
 2022-01-20 10:49.54 [info     ] Exiting context: demo_app.routes:route_handler [woodchipper.context] context.time_to_run_musec=5249 func_name=handle_request lineno=17 module=wsgi_app customer=ACMECORP user=1000
-
-{{< /highlight >}}
+```

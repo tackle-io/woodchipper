@@ -1,7 +1,39 @@
+[project]
+name = "woodchipper"
+description = "Woodchipper is a support library for plugging structured logging into a Python project."
+authors = [{"name" = "Tackle.io, Inc."}]
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Environment :: Console",
+    "Topic :: System :: Logging",
+]
+dependencies = [
+    "structlog>=21.5.0",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/tackle-io/woodchipper"
+Documentation = "https://tackle-io.github.io/woodchipper"
+
+[project.optional-dependencies]
+sentry = [
+    "structlog-sentry<2.0.0",
+]
+
 [tool.black]
 line-length = 119
-target-version = ['py36', 'py37', 'py38', 'py39']
+target-version = ['py38', 'py39','py310', 'py311']
 
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["woodchipper"]
+
+[tool.setuptools_scm]

@@ -10,7 +10,7 @@ A monitor class adds additional measurement and context to a `LoggingContext`. A
 
 Every monitor class subclasses the `BaseMonitor` class and implements its contract. The `BaseMonitor` is simply:
 
-{{< highlight python "lineNos=true,anchorLineNos=true,lineAnchors=basemonitor" >}}
+```python
 from typing import Dict
 
 from woodchipper.context import LoggableValue
@@ -25,7 +25,7 @@ class BaseMonitor:
 
     def finish(self) -> Dict[str, LoggableValue]:
         raise NotImplementedError()
-{{< /highlight >}}
+```
 
 The `setup()` method is called while entering a new `LoggingContext`, and the `finish()` method is called when
 exiting. The return value from `finish()` is any additional key/value pairs that should be included in the log
@@ -39,7 +39,7 @@ complete the contract it outlines.
 Woodchipper ships with a monitor class for tracking the database access of code executed in a `LoggingContext`. It
 requires a callback be defined to access the SQLAlchemy engine.
 
-{{< highlight python "lineNos=true,anchorLineNos=true,lineAnchors=sqlalchemy" >}}
+```python
 import os
 
 import sqlalchemy
@@ -58,7 +58,7 @@ woodchipper.configure(
     config=woodchipper.configs.JSONLogToStdout,
     facilities={"": "INFO"},
     monitors=[SQLAlchemyMonitor])
-{{< /highlight >}}
+```
 
 With this monitor configured and installed, whenever a `LoggingContext` exits and emits the log message noting the
 exit, it will include two additional keys in that exit log message:

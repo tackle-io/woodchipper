@@ -1,7 +1,8 @@
 -r requirements.txt
-pytest==6
+pytest~=6.2
 flask
 fastapi
 SQLAlchemy
 structlog-sentry
 requests
+tox

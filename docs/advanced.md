@@ -10,13 +10,13 @@ When a `LoggingContext` exits, it emits a log message saying so. That message in
 which the `LoggingContext` was defined. You may want to customize that name to something more understandable. To do
 this, provide a single positional argument to `LoggingContext` when you define it. That name will be used instead.
 
-```python {linenos=table}
+```python
 with LoggingContext("custom-name", user=request.user.id):
 ```
 
 When this context exits, the message will use the custom name instead of the module and function name.
 
-```python {linenos=table}
+```python
 2022-01-20 10:49.54 [info     ] Exiting context: custom-name [woodchipper.context] context.time_to_run_musec=1318 func_name=<module> lineno=1 module=<stdin> user=1000
 ```
 
@@ -33,7 +33,7 @@ key name, so it became `tackle.data` instead of simply `data`.
 You can also set the prefix on a `LoggingContext`, overriding the default key prefix, with the `_prefix` kwarg. For
 example:
 
-```python {linenos=table}
+```python
 with LoggingContext(user=request.user.id, _prefix="demo"):
     logging.info("Demo beginning.")
 ```
@@ -50,7 +50,7 @@ each request. Each of the keys in the context added by this integration will be 
 To enable the Flask integration, you have to modify the `Flask` app isntance. This is non-standard versus other Flask
 extensions, where you simply wrap the Flask object.
 
-```python {linenos=table}
+```python
 from flask import Flask
 from woodchipper.http.flask import WoodchipperFlask
 
@@ -78,7 +78,7 @@ However, if you also have Datadog's DDTrace middleware installed on the same app
 tracing to break. In those cases, manual installation (see second example) is preferred.
 
 Chipperize:
-```python {linenos=table}
+```python
 from fastapi import FastAPI
 from woodchipper.http.fastapi import WoodchipperFastAPI
 
@@ -87,7 +87,7 @@ WoodchipperFastAPI(app).chipperize()
 ```
 
 Manual installation:
-```python {linenos=table}
+```python
 from fastapi import FastAPI
 from woodchipper.http.fastapi import WoodchipperFastAPI
 
@@ -110,7 +110,7 @@ execution environment. Each of the keys in the context added by this integration
 
 To enable the Lambda integration, you have to use it like a WSGI middleware.
 
-```python {linenos=table}
+```python
 # Let's say your WSGI callable is named app
 from woodchipper.http.awslambda import WoodchipperLambda
 

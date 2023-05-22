@@ -1,0 +1,41 @@
+name: Publish to PyPI
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+jobs:
+  pypi-build:
+    name: Build release for PyPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+      - name: Make build artifacts
+        run: |
+          pip install build
+          python -m build --sdist --wheel --outdir dist/ .
+      - uses: actions/upload-artifact@v3
+        with:
+          path: ./dist
+
+  pypi-publish:
+    name: Upload release to PyPI
+    needs: ['pypi-build']
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+      - uses: actions/download-artifact@v3
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: artifact/
