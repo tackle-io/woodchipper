@@ -92,6 +92,9 @@ app = FastAPI()
 app.add_middleware(WoodchipperFastAPI)
 ```
 
+In either case, you will also need to add `"woodchipper": "INFO:` as an additional logging facility when callling
+`woodchipper.configure` is called to ensure log messages are output.
+
 The `WoodchipperFastAPI` constructor also takes an optional kwarg parameter `request_id_factory`. By passing to this
 parameter an argumentless callable, you can customize how the unique request ID is generated.
 
