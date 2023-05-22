@@ -58,6 +58,9 @@ app = Flask(__name__)
 flask.WoodchipperFlask(app).chipperize()
 ```
 
+The Flask integration's logging context is emitted on the `woodchipper.http.flask` named facility with `INFO` priority,
+so you'll want to make sure your logging configuration includes such messages.
+
 The `WoodchipperFlask` constructor also takes an optional kwarg parameter `request_id_factory`. By passing to this
 parameter an argumentless callable, you can customize how the unique request ID is generated.
 
@@ -92,8 +95,8 @@ app = FastAPI()
 app.add_middleware(WoodchipperFastAPI)
 ```
 
-In either case, you will also need to add `"woodchipper": "INFO:` as an additional logging facility when callling
-`woodchipper.configure` is called to ensure log messages are output.
+The middleware's logging context is emitted on the `woodchipper.http.fastapi` named facility with `INFO` priority,
+ so you'll want to make sure your logging configuration includes such messages.
 
 The `WoodchipperFastAPI` constructor also takes an optional kwarg parameter `request_id_factory`. By passing to this
 parameter an argumentless callable, you can customize how the unique request ID is generated.
