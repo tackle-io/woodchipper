@@ -21,7 +21,7 @@ woodchipper.configure(
 )
 
 
-@app.get("/")
+@app.get("/foo")
 def hello_world():
     with LoggingContext(testvar="testval"):
         return logging_ctx.as_dict()
@@ -29,13 +29,13 @@ def hello_world():
 
 def test_fastapi_with_woodchipper(caplog):
     with patch("woodchipper.context.os.getenv", return_value="woodchip"):
-        response = client.get("/")
+        response = client.get("/foo")
 
     assert response.status_code == 200
     assert response.json()["woodchip.testvar"] == "testval"
     assert response.json()["http.method"] == "GET"
     assert response.json()["http.header.host"] == "testserver"
-    assert response.json()["http.path"] == "http://testserver/"
+    assert response.json()["http.path"] == "http://testserver/foo"
 
     # These logs won't be available until after the context has exited and the response as returned
     fastapi_colon_request_exit_log = None
@@ -59,14 +59,14 @@ def test_fastapi_with_woodchipper_adds_query_params():
         "KEY3": "value3",  # confirms that it lowercases qparams
         "key4": "",  # confirms that it can handle empty values
     }
-    response = client.get("/", params=query_dict)
+    response = client.get("/foo", params=query_dict)
 
     assert response.status_code == 200
     assert response.json()["http.query_param.key1"] == "value1"
     assert response.json()["http.query_param.key2"] == ["val1", "val2", "val3"]
     assert response.json()["http.query_param.key3"] == "value3"
     assert response.json()["http.query_param.key4"] == ""
-    assert response.json()["http.path"] == "http://testserver/"  # confirms that querystring isn't included
+    assert response.json()["http.path"] == "http://testserver/foo"  # confirms that querystring isn't included
 
 
 def test_fastapi_header_blacklist():
@@ -82,6 +82,7 @@ def test_fastapi_header_blacklist():
     response = client.get("/")
 
     assert response.status_code == 200
+    assert response.json()["http.path"] == "http://testserver/"
     assert response.json()["http.header.host"] == "******"
 
 
@@ -129,13 +130,13 @@ def test_alternate_installation(caplog):
     app = FastAPI()
     app.add_middleware(WoodchipperFastAPI)
     with patch("woodchipper.context.os.getenv", return_value="woodchip"):
-        response = client.get("/")
+        response = client.get("/foo")
 
     assert response.status_code == 200
     assert response.json()["woodchip.testvar"] == "testval"
     assert response.json()["http.method"] == "GET"
     assert response.json()["http.header.host"] == "testserver"
-    assert response.json()["http.path"] == "http://testserver/"
+    assert response.json()["http.path"] == "http://testserver/foo"
 
     # These logs won't be available until after the context has exited and the response as returned
     fastapi_colon_request_exit_log = None
