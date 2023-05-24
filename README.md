@@ -15,8 +15,7 @@ pip install woodchipper
 After cloning the repository, setting up a virtual environment, and activating it...
 
 ```
-pip install -e .
-pip install -r requirements-dev.txt
+pip install -e .[dev]
 ```
 
 We recommend you install [pre-commit](https://pre-commit.com/) and install the pre-commit hooks using:
@@ -25,22 +24,20 @@ We recommend you install [pre-commit](https://pre-commit.com/) and install the p
 pre-commit install
 ```
 
-If you add new dependencies to the project, put them in the `setup.cfg` file and regenerate the `requirements.txt`
+If you add new dependencies to the project, put them in the `pyproject.toml` file and regenerate the `requirements.txt`
 file using:
 
 ```
-pip-compile --output-file=requirements.txt setup.cfg
+pip-compile --resolver=backtracking --no-emit-index-url pyproject.toml
 ```
 
-Any dependencies for development or testing should go in the appropriate `requirements-(dev|test).in` file, before
-running `pip-compile` against that file.
 
 ## Releasing to PyPI
 
+Releases are handled through GitHub Actions by tagging a revision in GitHub. To release version 0.13.37:
+
 ```
-python -m build
-# Test your upload first
-twine upload -r testpypi dist/*
-# If everything looks good, upload for real
-twine upload dist/*
+# Obviously adjust the version number to the version you're releasing, but it must be of the form vX.Y or vX.Y.Z
+git tag -a v0.13.37 -m "Releasing v0.13.37"
+git push origin --tags
 ```

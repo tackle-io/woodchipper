@@ -1,5 +1,4 @@
 import uuid
-from typing import Callable
 
 from fastapi import FastAPI, Request
 from starlette.types import ASGIApp, Receive, Scope, Send
@@ -18,18 +17,7 @@ class WoodchipperFastAPI:
     ):
         self._app = app
         self._blacklisted_headers = blacklisted_headers
-        self._request_id_factory = request_id_factory or (lambda: str(uuid.uuid4()))
-
-    def _wrap_build_middleware_stack(self, original_fn: Callable) -> Callable:
-        def __wrapped__() -> ASGIApp:
-            asgi_app = original_fn()
-            return WoodchipperFastAPI(
-                app=asgi_app,
-                blacklisted_headers=self._blacklisted_headers,
-                request_id_factory=self._request_id_factory,
-            )
-
-        return __wrapped__
+        self._request_id_factory = request_id_factory
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         # When the request object parses query params it doesn't combine repeat
@@ -61,7 +49,7 @@ class WoodchipperFastAPI:
         with LoggingContext(
             "fastapi:request",
             **{
-                "id": self._request_id_factory(),
+                "id": self._request_id_factory() if self._request_id_factory is not None else str(uuid.uuid4()),
                 "body_size": int(request.headers.get("content-length", 0)),
                 "method": request.method,
                 "path": str(request.base_url)[:-1] + request.url.path if request.url.path else request.base_url,
@@ -79,5 +67,15 @@ class WoodchipperFastAPI:
                 logging_ctx.update({"http.response.status_code": 500})
                 raise
 
+    def __build_middleware_stack__(self) -> ASGIApp:
+        asgi_app = self._app.__orig_build_middleware_stack__()
+        return type(self)(
+            asgi_app, request_id_factory=self._request_id_factory, blacklisted_headers=self._blacklisted_headers
+        )
+
     def chipperize(self):
-        self._app.build_middleware_stack = self._wrap_build_middleware_stack(self._app.build_middleware_stack)
+        if hasattr(self._app, "__orig_build_middleware_stack__"):
+            # This app has already been chipperized. No need to double up.
+            return
+        self._app.__orig_build_middleware_stack__ = self._app.build_middleware_stack
+        self._app.build_middleware_stack = self.__build_middleware_stack__
