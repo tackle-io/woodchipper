@@ -24,6 +24,20 @@ Documentation = "https://tackle-io.github.io/woodchipper"
 sentry = [
     "structlog-sentry<2.0.0",
 ]
+dev = [
+    "build",
+    "twine~=3.6.0",
+    "pip-tools~=6.4.0",
+    "mkdocs",
+    "pytest~=6.2",
+    "flask",
+    "fastapi",
+    "httpx",
+    "SQLAlchemy<2",
+    "structlog-sentry<2",
+    "requests",
+    "tox",
+]
 
 [tool.black]
 line-length = 119

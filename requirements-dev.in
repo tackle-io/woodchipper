@@ -1,6 +1,0 @@
--r requirements-test.txt
-build
-twine~=3.6.0
-pip-tools~=6.4.0
-mkdocs
-setuptools_scm[toml]>=6.2

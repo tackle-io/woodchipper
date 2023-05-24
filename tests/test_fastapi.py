@@ -1,6 +1,7 @@
 import ast
 from unittest.mock import patch
 
+import pytest
 from fastapi import FastAPI, testclient
 from fastapi.testclient import TestClient
 
@@ -9,10 +10,23 @@ from woodchipper.configs import DevLogToStdout
 from woodchipper.context import LoggingContext, logging_ctx
 from woodchipper.http.fastapi import WoodchipperFastAPI
 
-app = FastAPI()
-woodchipper_app = WoodchipperFastAPI(app)
-woodchipper_app.chipperize()
-client = TestClient(woodchipper_app)
+
+@pytest.fixture
+def app():
+    app = FastAPI()
+    WoodchipperFastAPI(app).chipperize()
+
+    @app.get("/foo")
+    def hello_world():
+        with LoggingContext(testvar="testval"):
+            return logging_ctx.as_dict()
+
+    return app
+
+
+@pytest.fixture
+def client(app):
+    return TestClient(app)
 
 
 woodchipper.configure(
@@ -21,13 +35,7 @@ woodchipper.configure(
 )
 
 
-@app.get("/foo")
-def hello_world():
-    with LoggingContext(testvar="testval"):
-        return logging_ctx.as_dict()
-
-
-def test_fastapi_with_woodchipper(caplog):
+def test_fastapi_with_woodchipper(client, caplog):
     with patch("woodchipper.context.os.getenv", return_value="woodchip"):
         response = client.get("/foo")
 
@@ -52,7 +60,9 @@ def test_fastapi_with_woodchipper(caplog):
     assert type(fastapi_colon_request_exit_log["http.response.content_length"]) is int
 
 
-def test_fastapi_with_woodchipper_adds_query_params():
+def test_fastapi_with_woodchipper_adds_query_params(
+    client,
+):
     query_dict = {
         "key1": "value1",
         "key2": ["val1", "val2", "val3"],  # confirms that multiple params are handled
@@ -71,9 +81,8 @@ def test_fastapi_with_woodchipper_adds_query_params():
 
 def test_fastapi_header_blacklist():
     app = FastAPI()
-    woodchipper_app = WoodchipperFastAPI(app, blacklisted_headers=["host"])
-    woodchipper_app.chipperize()
-    client = testclient.TestClient(woodchipper_app)
+    WoodchipperFastAPI(app, blacklisted_headers=["host"]).chipperize()
+    client = testclient.TestClient(app)
 
     @app.get("/")
     def hello():
@@ -87,15 +96,15 @@ def test_fastapi_header_blacklist():
 
 
 def test_fastapi_gen_id():
-    woodchipper_app = WoodchipperFastAPI(app, request_id_factory=lambda: "id")
-    woodchipper_app.chipperize()
-    client = testclient.TestClient(woodchipper_app)
+    app = FastAPI()
+    WoodchipperFastAPI(app, request_id_factory=lambda: "id").chipperize()
+    client = testclient.TestClient(app)
 
-    @app.get("/")
+    @app.get("/id_gen")
     def hello():
         return logging_ctx.as_dict()
 
-    response = client.get("/")
+    response = client.get("/id_gen")
 
     assert response.status_code == 200
     assert response.json()["http.id"] == "id"
@@ -103,9 +112,8 @@ def test_fastapi_gen_id():
 
 def test_fastapi_uncaught_error(caplog):
     app = FastAPI()
-    woodchipper_app = WoodchipperFastAPI(app, request_id_factory=lambda: "id")
-    woodchipper_app.chipperize()
-    client = testclient.TestClient(woodchipper_app, raise_server_exceptions=False)
+    WoodchipperFastAPI(app, request_id_factory=lambda: "id").chipperize()
+    client = testclient.TestClient(app, raise_server_exceptions=False)
 
     @app.get("/")
     def hello():
@@ -124,11 +132,9 @@ def test_fastapi_uncaught_error(caplog):
     assert fastapi_colon_request_exit_log["http.response.status_code"] == 500
 
 
-def test_alternate_installation(caplog):
+def test_alternate_installation(client, caplog):
     # If users do not want to use chipperize, which overrides the middleware installation order,
     # they can install using the typical FastAPI add_middleware pattern
-    app = FastAPI()
-    app.add_middleware(WoodchipperFastAPI)
     with patch("woodchipper.context.os.getenv", return_value="woodchip"):
         response = client.get("/foo")
 
