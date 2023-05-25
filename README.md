@@ -24,13 +24,6 @@ We recommend you install [pre-commit](https://pre-commit.com/) and install the p
 pre-commit install
 ```
 
-If you add new dependencies to the project, put them in the `pyproject.toml` file and regenerate the `requirements.txt`
-file using:
-
-```
-pip-compile --resolver=backtracking --no-emit-index-url pyproject.toml
-```
-
 
 ## Releasing to PyPI
 

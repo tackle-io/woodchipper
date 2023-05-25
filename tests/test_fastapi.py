@@ -132,9 +132,19 @@ def test_fastapi_uncaught_error(caplog):
     assert fastapi_colon_request_exit_log["http.response.status_code"] == 500
 
 
-def test_alternate_installation(client, caplog):
+def test_alternate_installation(caplog):
     # If users do not want to use chipperize, which overrides the middleware installation order,
     # they can install using the typical FastAPI add_middleware pattern
+    app = FastAPI()
+    app.add_middleware(WoodchipperFastAPI)
+
+    @app.get("/foo")
+    def hello_world():
+        with LoggingContext(testvar="testval"):
+            return logging_ctx.as_dict()
+
+    client = TestClient(app)
+
     with patch("woodchipper.context.os.getenv", return_value="woodchip"):
         response = client.get("/foo")
 
