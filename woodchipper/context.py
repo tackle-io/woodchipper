@@ -5,12 +5,13 @@ import time
 from collections.abc import MutableMapping
 from decimal import Decimal
 from functools import wraps
-from typing import Any, Mapping, NamedTuple, Optional, Tuple, Union, cast
+from typing import Any, Callable, Mapping, NamedTuple, Optional, Tuple, TypeVar, Union, cast
 
 import woodchipper
 
 LoggableValue = Optional[Union[str, int, bool, Decimal, float]]
 LoggingContextType = Mapping[str, LoggableValue]
+DecoratedCallable = TypeVar("DecoratedCallable", bound=Callable[..., Any])
 
 
 class Missing:
@@ -208,7 +209,7 @@ class LoggingContext:
         self._token = None
         return False
 
-    def __call__(self, f):
+    def __call__(self, f: DecoratedCallable) -> DecoratedCallable:
         self.decorator_mapping = _build_path_head_to_param_config_map(
             self.injected_context, delimiter=self.path_delimiter
         )
@@ -250,7 +251,7 @@ class LoggingContext:
             with self:
                 return f(*func_args, **func_kwargs)
 
-        return wrapper
+        return wrapper  # type: ignore
 
 
 logging_ctx = LoggingContextVar("logging_ctx")
