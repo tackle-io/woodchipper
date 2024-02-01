@@ -55,7 +55,7 @@ def test_logging_context_name():
 
     ctx_obj = context.LoggingContext(a=1, _prefix="test")
     with ctx_obj:
-        assert ctx_obj.name is None
+        assert ctx_obj.name == "test_context:test_logging_context_name"
     assert ctx_obj.name == "test_context:test_logging_context_name"
 
     ctx_obj = context.LoggingContext("test-name", a="x", _prefix="test")
