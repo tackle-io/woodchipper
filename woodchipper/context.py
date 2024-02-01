@@ -184,7 +184,7 @@ class LoggingContext:
             monitor.setup()
         self.start_time = time.time()
 
-        woodchipper.get_logger(module_name).info(f"Entering context: {self.name}", context_name=self.name)
+        woodchipper.get_logger(module_name).debug(f"Entering context: {self.name}", context_name=self.name)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         current_frame = inspect.currentframe()
@@ -200,7 +200,7 @@ class LoggingContext:
         monitored_data.update({"context.time_to_run_musec": int((time.time() - self.start_time) * 1e6)})
         for monitor in self._monitors:
             monitored_data.update(monitor.finish())
-        woodchipper.get_logger(module_name).info(
+        woodchipper.get_logger(module_name).debug(
             f"Exiting context: {self.name}", context_name=self.name, **monitored_data
         )
         assert self._token

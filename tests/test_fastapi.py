@@ -1,4 +1,5 @@
 import ast
+import logging
 from unittest.mock import patch
 
 import pytest
@@ -36,6 +37,7 @@ woodchipper.configure(
 
 
 def test_fastapi_with_woodchipper(client, caplog):
+    caplog.set_level(logging.DEBUG)
     with patch("woodchipper.context.os.getenv", return_value="woodchip"):
         response = client.get("/foo")
 
@@ -120,6 +122,7 @@ def test_fastapi_gen_id():
 
 
 def test_fastapi_uncaught_error(caplog):
+    caplog.set_level(logging.DEBUG)
     app = FastAPI()
     WoodchipperFastAPI(app, request_id_factory=lambda: "id").chipperize()
     client = testclient.TestClient(app, raise_server_exceptions=False)
@@ -142,6 +145,7 @@ def test_fastapi_uncaught_error(caplog):
 
 
 def test_alternate_installation(caplog):
+    caplog.set_level(logging.DEBUG)
     # If users do not want to use chipperize, which overrides the middleware installation order,
     # they can install using the typical FastAPI add_middleware pattern
     app = FastAPI()

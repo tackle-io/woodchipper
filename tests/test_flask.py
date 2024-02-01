@@ -1,5 +1,6 @@
 import ast
 import json
+import logging
 from unittest.mock import patch
 from urllib.parse import urlencode
 
@@ -19,6 +20,7 @@ def hello_world():
 
 
 def test_flask_with_woodchipper(caplog):
+    caplog.set_level(logging.DEBUG)
     with patch("woodchipper.context.os.getenv", return_value="woodchip"):
         with app.test_client() as client:
             response = client.get("/")
@@ -59,6 +61,7 @@ def raise_unhandled_exception():
 
 
 def test_flask_raises_unhandled_exception(caplog):
+    caplog.set_level(logging.DEBUG)
     with app.test_client() as client:
         response = client.get("/raise_unhandled_exception")
     assert response.status_code == 500
