@@ -28,7 +28,7 @@ class TestWoodchipperLogging:
             {"event": "Warning Log Test", "log_level": "warning"},
             {"event": "Error Log Test", "log_level": "error"},
             {"event": "Critical Log Test", "log_level": "critical"},
-            {"exc_info": True, "event": "Exception Log Test", "log_level": "error"},
+            {"exc_info": True, "event": "Exception Log Test", "log_level": "exception"},
         ]
 
     @pytest.mark.skip("Figure out a way to test based on what actually get handled.")

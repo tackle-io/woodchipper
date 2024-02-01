@@ -171,9 +171,20 @@ class LoggingContext:
         self._token = logging_ctx.update(
             {(f"{self.prefix}.{k}" if self.prefix else k): v for k, v in self.injected_context.items()}
         )
+
+        current_frame = inspect.currentframe()
+        calling_frame = inspect.getouterframes(current_frame, 2)[1]
+        module = inspect.getmodule(calling_frame[0])
+        module_name = module.__name__ if module else "<unknown>"
+        if self.name is None:
+            func_name = calling_frame[3]
+            self.name = f"{module_name}:{func_name}"
+
         for monitor in self._monitors:
             monitor.setup()
         self.start_time = time.time()
+
+        woodchipper.get_logger(module_name).info(f"Entering context: {self.name}", context_name=self.name)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         current_frame = inspect.currentframe()

@@ -46,13 +46,22 @@ def test_fastapi_with_woodchipper(client, caplog):
     assert response.json()["http.path"] == "http://testserver/foo"
 
     # These logs won't be available until after the context has exited and the response as returned
+    fastapi_colon_request_enter_log = None
     fastapi_colon_request_exit_log = None
     for log in caplog.records:
         msg = ast.literal_eval(log.message)  # weirdly the log.message is a python dict that is a string
+        if msg["event"] == "Entering context: fastapi:request":
+            fastapi_colon_request_enter_log = msg
+
         if msg["event"] == "Exiting context: fastapi:request":
             fastapi_colon_request_exit_log = msg
+
+        if fastapi_colon_request_enter_log and fastapi_colon_request_exit_log:
             break
 
+    assert (
+        fastapi_colon_request_enter_log is not None
+    ), "An enter message matching the flask:request pattern couldn't be found"
     assert (
         fastapi_colon_request_exit_log is not None
     ), "An exit message matching the flask:request pattern couldn't be found"
@@ -155,13 +164,22 @@ def test_alternate_installation(caplog):
     assert response.json()["http.path"] == "http://testserver/foo"
 
     # These logs won't be available until after the context has exited and the response as returned
+    fastapi_colon_request_enter_log = None
     fastapi_colon_request_exit_log = None
     for log in caplog.records:
         msg = ast.literal_eval(log.message)  # weirdly the log.message is a python dict that is a string
+        if msg["event"] == "Entering context: fastapi:request":
+            fastapi_colon_request_enter_log = msg
+
         if msg["event"] == "Exiting context: fastapi:request":
             fastapi_colon_request_exit_log = msg
+
+        if fastapi_colon_request_enter_log and fastapi_colon_request_exit_log:
             break
 
+    assert (
+        fastapi_colon_request_enter_log is not None
+    ), "An enter message matching the flask:request pattern couldn't be found"
     assert (
         fastapi_colon_request_exit_log is not None
     ), "An exit message matching the flask:request pattern couldn't be found"

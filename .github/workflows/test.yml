@@ -28,4 +28,4 @@ jobs:
         run: |
           pip install tox
       - name: Run tox
-        run: tox -e pre-commit
+        run: tox -e precommit

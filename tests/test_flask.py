@@ -30,13 +30,22 @@ def test_flask_with_woodchipper(caplog):
     assert response_json["http.path"] == "http://localhost/"
 
     # These logs won't be available until after the context has exited and the response as returned
+    flask_colon_request_enter_log = None
     flask_colon_request_exit_log = None
     for log in caplog.records:
         msg = ast.literal_eval(log.message)  # weirdly the log.message is a python dict that is a string
+        if msg["event"] == "Entering context: flask:request":
+            flask_colon_request_enter_log = msg
+
         if msg["event"] == "Exiting context: flask:request":
             flask_colon_request_exit_log = msg
+
+        if flask_colon_request_exit_log and flask_colon_request_exit_log:
             break
 
+    assert (
+        flask_colon_request_enter_log is not None
+    ), "An exit message matching the flask:request pattern couldn't be found"
     assert (
         flask_colon_request_exit_log is not None
     ), "An exit message matching the flask:request pattern couldn't be found"
@@ -55,13 +64,22 @@ def test_flask_raises_unhandled_exception(caplog):
     assert response.status_code == 500
 
     # These logs won't be available until after the context has exited and the response as returned
+    flask_colon_request_enter_log = None
     flask_colon_request_exit_log = None
     for log in caplog.records:
         msg = ast.literal_eval(log.message)  # weirdly the log.message is a python dict that is a string
+        if msg["event"] == "Entering context: flask:request":
+            flask_colon_request_enter_log = msg
+
         if msg["event"] == "Exiting context: flask:request":
             flask_colon_request_exit_log = msg
+
+        if flask_colon_request_exit_log and flask_colon_request_exit_log:
             break
 
+    assert (
+        flask_colon_request_enter_log is not None
+    ), "An exit message matching the flask:request pattern couldn't be found"
     assert (
         flask_colon_request_exit_log is not None
     ), "An exit message matching the flask:request pattern couldn't be found"
