@@ -63,10 +63,10 @@ def test_fastapi_with_woodchipper(client, caplog):
 
     assert (
         fastapi_colon_request_enter_log is not None
-    ), "An enter message matching the flask:request pattern couldn't be found"
+    ), "An enter message matching the fastapi:request pattern couldn't be found"
     assert (
         fastapi_colon_request_exit_log is not None
-    ), "An exit message matching the flask:request pattern couldn't be found"
+    ), "An exit message matching the fastapi:request pattern couldn't be found"
     assert fastapi_colon_request_exit_log["http.response.status_code"] == 200
     assert type(fastapi_colon_request_exit_log["http.response.content_length"]) is int
 
@@ -183,9 +183,9 @@ def test_alternate_installation(caplog):
 
     assert (
         fastapi_colon_request_enter_log is not None
-    ), "An enter message matching the flask:request pattern couldn't be found"
+    ), "An enter message matching the fastapi:request pattern couldn't be found"
     assert (
         fastapi_colon_request_exit_log is not None
-    ), "An exit message matching the flask:request pattern couldn't be found"
+    ), "An exit message matching the fastapi:request pattern couldn't be found"
     assert fastapi_colon_request_exit_log["http.response.status_code"] == 200
     assert type(fastapi_colon_request_exit_log["http.response.content_length"]) is int
