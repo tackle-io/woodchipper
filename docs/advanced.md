@@ -41,6 +41,31 @@ with LoggingContext(user=request.user.id, _prefix="demo"):
 In the above message, the `user` contextual key would be outputted as `demo.user`, regardless of the value of the
 `WOODCHIPPER_KEY_PREFIX` environment variable.
 
+## Changing context logging levels
+
+Woodchipper supports changing the log level of entrance and exit logging for contexts, with the default log level of `"INFO"`.
+
+You can set the default log level for all context logs by setting the environment variable `WOODCHIPPER_CONTEXT_LOG_LEVEL` to
+the desired log level name. For example, if you set `WOODCHIPPER_CONTEXT_LOG_LEVEL` to `"DEBUG"` all logs created when entering or
+exiting a LoggingContext would be debug by default.
+
+You can also set the log level on a `LoggingContext`, overriding the default log level, with the `_log_level` kwarg. For
+example:
+
+```python
+with LoggingContext(user=request.user.id, _log_level="ERROR"):
+    logger.info("Demo beginning.")
+```
+
+In the above message, the entrance and exit logs would be outputted as level `"ERROR"`, regardless of the value of the
+`WOODCHIPPER_CONTEXT_LOG_LEVEL` environment variable. Examples of the output logs can be seen here:
+
+```
+2024-02-02T15:44:48.488489 [error    ] Entering context: __main__:<module> [__main__] func_name=<module> lineno=1 module=demo tkl.context_name=__main__:<module> tkl.user=user-123
+2024-02-02T15:44:48.488805 [info     ] Demo beginning.      [__main__] func_name=<module> lineno=2 module=demo tkl.user=user-123
+2024-02-02T15:44:48.489311 [error    ] Exiting context: __main__:<module> [__main__] context.time_to_run_musec=859 func_name=<module> lineno=1 module=demo tkl.context_name=__main__:<module> tkl.user=user-123
+```
+
 ## Using Woodchipper with Flask
 
 Woodchipper ships with a built-in Flask integration, which wraps the entire request/response cycle in a

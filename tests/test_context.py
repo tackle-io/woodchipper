@@ -39,7 +39,21 @@ def test_logging_context_prefix():
     with ctx_obj:
         assert context.logging_ctx.as_dict() == {"test.a": 1}
 
-    with patch("woodchipper.context.os.getenv", return_value="env"):
+    with patch.dict("woodchipper.context.os.environ", WOODCHIPPER_KEY_PREFIX="env"):
+        with context.LoggingContext(a=1):
+            assert context.logging_ctx.as_dict() == {"env.a": 1}
+
+    with context.LoggingContext(a=1, _prefix=None):
+        assert context.logging_ctx.as_dict() == {"a": 1}
+
+
+def test_logging_context_log_level():
+    assert context.logging_ctx.as_dict() == {}
+    ctx_obj = context.LoggingContext("test-name", a=1, _prefix="test")
+    with ctx_obj:
+        assert context.logging_ctx.as_dict() == {"test.a": 1}
+
+    with patch.dict("woodchipper.context.os.environ", WOODCHIPPER_KEY_PREFIX="env"):
         with context.LoggingContext(a=1):
             assert context.logging_ctx.as_dict() == {"env.a": 1}
 

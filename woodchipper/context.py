@@ -1,5 +1,6 @@
 import contextvars
 import inspect
+import logging
 import os
 import time
 from collections.abc import MutableMapping
@@ -11,6 +12,8 @@ import woodchipper
 
 LoggableValue = Optional[Union[str, int, bool, Decimal, float]]
 LoggingContextType = Mapping[str, LoggableValue]
+
+DEFAULT_LOG_LEVEL = logging.INFO
 
 
 class Missing:
@@ -138,12 +141,25 @@ def _convert_to_loggable_value(value: Any) -> LoggableValue:
             )
 
 
+def _convert_to_valid_log_level(log_level: Union[str, int, Missing]) -> int:
+    if isinstance(log_level, Missing):
+        return DEFAULT_LOG_LEVEL
+
+    if isinstance(log_level, str):
+        log_level = logging.getLevelName(log_level)
+
+    if log_level not in logging._levelToName:
+        return DEFAULT_LOG_LEVEL
+
+    return log_level
+
+
 class LoggingContext:
     """A context manager for logging context. Can also be used as a decorator.
 
     Usage:
     ```python
-    with LoggingContext(data_to_inject_to_logging_context):
+    with LoggingContext(**data_to_inject_to_logging_context):
         some_function()
     ```
     """
@@ -157,11 +173,15 @@ class LoggingContext:
         _prefix: Union[str, Missing] = missing,
         _missing_default=missing,
         _path_delimiter=".",
+        _log_level: Union[str, int, Missing] = missing,
         **kwargs: LoggableValue,
     ):
         self.name = name
         self.injected_context = kwargs
         self.prefix = os.getenv("WOODCHIPPER_KEY_PREFIX") if _prefix is missing else _prefix
+        self._log_level = _convert_to_valid_log_level(
+            os.getenv("WOODCHIPPER_CONTEXT_LOG_LEVEL", DEFAULT_LOG_LEVEL) if _log_level is missing else _log_level
+        )
         self._token = None
         self._monitors = [cls() for cls in woodchipper._monitors]
         self.missing_default = _missing_default
@@ -183,8 +203,9 @@ class LoggingContext:
         for monitor in self._monitors:
             monitor.setup()
         self.start_time = time.time()
-
-        woodchipper.get_logger(module_name).debug(f"Entering context: {self.name}", context_name=self.name)
+        woodchipper.get_logger(module_name).log(
+            self._log_level, f"Entering context: {self.name}", context_name=self.name
+        )
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         current_frame = inspect.currentframe()
@@ -200,8 +221,8 @@ class LoggingContext:
         monitored_data.update({"context.time_to_run_musec": int((time.time() - self.start_time) * 1e6)})
         for monitor in self._monitors:
             monitored_data.update(monitor.finish())
-        woodchipper.get_logger(module_name).debug(
-            f"Exiting context: {self.name}", context_name=self.name, **monitored_data
+        woodchipper.get_logger(module_name).log(
+            self._log_level, f"Exiting context: {self.name}", context_name=self.name, **monitored_data
         )
         assert self._token
         logging_ctx.reset(self._token)

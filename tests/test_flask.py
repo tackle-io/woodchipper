@@ -21,7 +21,7 @@ def hello_world():
 
 def test_flask_with_woodchipper(caplog):
     caplog.set_level(logging.DEBUG)
-    with patch("woodchipper.context.os.getenv", return_value="woodchip"):
+    with patch.dict("woodchipper.context.os.environ", WOODCHIPPER_KEY_PREFIX="woodchip"):
         with app.test_client() as client:
             response = client.get("/")
     assert response.status_code == 200
@@ -98,7 +98,7 @@ def test_flask_with_woodchipper_adds_query_params():
     }
     encoded = urlencode(query_dict, doseq=True)
 
-    with patch("woodchipper.context.os.getenv", return_value="woodchip"):
+    with patch.dict("woodchipper.context.os.environ", WOODCHIPPER_KEY_PREFIX="woodchip"):
         with app.test_client() as client:
             response = client.get("/", query_string=encoded)
 
