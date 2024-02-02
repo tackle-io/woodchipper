@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.13.1] X February, 2024
+- Adds environment variable `WOODCHIPPER_CONTEXT_LOG_LEVEL` to allow configuration of entrance and exit logging for logging contexts.
+
+## [v0.13.0] 2 February, 2024
+- Adds entrance logging for LoggingContext
+- Changes log level for exit logging to DEBUG
+
 ## [v0.12.1] 23 May, 2023
 - Corrects bug in FastAPI integration, so that http.path outputs full URL, bringing it to parity with Flask integration
 

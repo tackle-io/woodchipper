@@ -15,6 +15,10 @@ For example, if you set this environment variable to `tackle`, then a key `user`
 
 If you want to override this, call the clear_prefix() function on the logger once initialized.
 
+### `WOODCHIPPER_CONTEXT_LOG_LEVEL`
+
+If set, all entrance and exit logging for contexts will be logged at the level specified. Default is `"INFO"`.
+
 ### `WOODCHIPPER_DISABLE_SENTRY`
 
 If set to a non-empty value, the built-in Sentry integration will be disabled.

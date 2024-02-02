@@ -38,7 +38,7 @@ woodchipper.configure(
 
 def test_fastapi_with_woodchipper(client, caplog):
     caplog.set_level(logging.DEBUG)
-    with patch("woodchipper.context.os.getenv", return_value="woodchip"):
+    with patch.dict("woodchipper.context.os.environ", WOODCHIPPER_KEY_PREFIX="woodchip"):
         response = client.get("/foo")
 
     assert response.status_code == 200
@@ -158,7 +158,7 @@ def test_alternate_installation(caplog):
 
     client = TestClient(app)
 
-    with patch("woodchipper.context.os.getenv", return_value="woodchip"):
+    with patch.dict("woodchipper.context.os.environ", WOODCHIPPER_KEY_PREFIX="woodchip"):
         response = client.get("/foo")
 
     assert response.status_code == 200
